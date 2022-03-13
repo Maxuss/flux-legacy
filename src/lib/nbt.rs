@@ -111,7 +111,10 @@ pub trait IntoTag {
     fn nbt(self) -> NbtTag;
 }
 
-impl<T> IntoTag for T where T: Into<NbtTag> {
+impl<T> IntoTag for T
+where
+    T: Into<NbtTag>,
+{
     fn nbt(self) -> NbtTag {
         self.into()
     }
@@ -139,9 +142,16 @@ pub enum NbtTag {
     LongArray(Vec<i64>),
 }
 
-impl<S, V> Into<NbtTag> for HashMap<S, V> where S: Into<String>, V: Into<NbtTag> {
+impl<S, V> Into<NbtTag> for HashMap<S, V>
+where
+    S: Into<String>,
+    V: Into<NbtTag>,
+{
     fn into(self) -> NbtTag {
-        let map = self.into_iter().map(|(k, v)| (k.into(), v.into())).collect::<HashMap<String, NbtTag>>();
+        let map = self
+            .into_iter()
+            .map(|(k, v)| (k.into(), v.into()))
+            .collect::<HashMap<String, NbtTag>>();
         NbtTag::Compound(Compound::new(map))
     }
 }
@@ -194,7 +204,10 @@ impl Into<NbtTag> for &str {
     }
 }
 
-impl<N> Into<NbtTag> for Vec<N> where N: Into<NbtTag> {
+impl<N> Into<NbtTag> for Vec<N>
+where
+    N: Into<NbtTag>,
+{
     fn into(self) -> NbtTag {
         NbtTag::List(self.into_iter().map(|e| e.into()).collect::<Vec<NbtTag>>())
     }

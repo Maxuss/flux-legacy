@@ -1,4 +1,3 @@
-
 #[macro_export]
 macro_rules! convert_nbt_type {
     ({
@@ -41,7 +40,7 @@ macro_rules! convert_nbt_key {
     };
     ([$var:ident]) => {
         $var.to_string()
-    }
+    };
 }
 
 #[macro_export]

@@ -26,8 +26,8 @@ macro_rules! convert_nbt_type {
     ([B;$($ele:tt),* $(,)*]) => {
         $crate::nbt::NbtTag::ByteArray(vec![$($ele,)*])
     };
-    ($expr:expr) => {
-        $expr
+    ($closure:tt) => {
+        $closure
     }
 }
 

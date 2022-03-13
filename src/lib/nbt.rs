@@ -105,6 +105,24 @@ impl IntoIterator for Compound {
     }
 }
 
+/// Trait used to convert structs into traits
+pub trait IntoTag {
+    /// Converts this element to Nbt Tag
+    fn nbt(self) -> NbtTag;
+}
+
+impl<T> IntoTag for T where T: Into<NbtTag> {
+    fn nbt(self) -> NbtTag {
+        self.into()
+    }
+}
+
+impl IntoTag for Compound {
+    fn nbt(self) -> NbtTag {
+        NbtTag::Compound(self)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum NbtTag {
     Byte(i8),
@@ -119,6 +137,67 @@ pub enum NbtTag {
     Compound(Compound),
     IntArray(Vec<i32>),
     LongArray(Vec<i64>),
+}
+
+impl<S, V> Into<NbtTag> for HashMap<S, V> where S: Into<String>, V: Into<NbtTag> {
+    fn into(self) -> NbtTag {
+        let map = self.into_iter().map(|(k, v)| (k.into(), v.into())).collect::<HashMap<String, NbtTag>>();
+        NbtTag::Compound(Compound::new(map))
+    }
+}
+
+impl Into<NbtTag> for i8 {
+    fn into(self) -> NbtTag {
+        NbtTag::Byte(self)
+    }
+}
+
+impl Into<NbtTag> for i16 {
+    fn into(self) -> NbtTag {
+        NbtTag::Short(self)
+    }
+}
+
+impl Into<NbtTag> for i32 {
+    fn into(self) -> NbtTag {
+        NbtTag::Int(self)
+    }
+}
+
+impl Into<NbtTag> for i64 {
+    fn into(self) -> NbtTag {
+        NbtTag::Long(self)
+    }
+}
+
+impl Into<NbtTag> for f32 {
+    fn into(self) -> NbtTag {
+        NbtTag::Float(self)
+    }
+}
+
+impl Into<NbtTag> for f64 {
+    fn into(self) -> NbtTag {
+        NbtTag::Double(self)
+    }
+}
+
+impl Into<NbtTag> for String {
+    fn into(self) -> NbtTag {
+        NbtTag::String(self)
+    }
+}
+
+impl Into<NbtTag> for &str {
+    fn into(self) -> NbtTag {
+        NbtTag::String(self.to_string())
+    }
+}
+
+impl<N> Into<NbtTag> for Vec<N> where N: Into<NbtTag> {
+    fn into(self) -> NbtTag {
+        NbtTag::List(self.into_iter().map(|e| e.into()).collect::<Vec<NbtTag>>())
+    }
 }
 
 impl NbtTag {

@@ -1,17 +1,18 @@
 pub mod nbt;
 pub mod snbt;
 pub mod utils;
-
+pub mod macros;
 #[cfg(test)]
 mod tests {
-    use crate::nbt::{BinaryNbtWriter, Compound, NbtTag, NbtWriter};
+    use crate::nbt::{BinaryNbtWriter, Compound, IntoTag, NbtTag, NbtWriter};
     use crate::utils::force_create;
     use std::collections::HashMap;
     use std::env::current_dir;
+    use crate::nbt;
     use crate::snbt::StringNbtWriter;
 
     #[test]
-    fn test_snbt() {
+    fn test_nbt() {
         let map = HashMap::<String, NbtTag>::from([
             ("byte".to_string(), NbtTag::Byte(120)),
             ("str".to_string(), NbtTag::String("A string!".to_string())),
@@ -35,5 +36,30 @@ mod tests {
         let mut sw = StringNbtWriter::new(sf);
         bw.write_tag(None, NbtTag::Compound(comp.to_owned())).unwrap();
         sw.write_tag(None, NbtTag::Compound(comp.to_owned())).unwrap();
+    }
+
+    #[test]
+    fn test_macros() {
+        let key = "Proc-Key";
+        let comp = nbt! {
+            key: "value", // Normal key + value
+            "Another-Key": "value", // Ket that is already a string
+            double: 12.12_f64, // Doubles / floats / ints
+            float: 12.12_f32,
+            int: 12000,
+            comp: {
+                key: "value"
+            }, // inner compounds
+            list: [120, 130, 0xFAF], // using normal lists
+            int_array: [I; 120, 140], // int arrays (as specified by I; infix)
+            long_array: [L; 5000000, 12000000], // long arrays (L; infix)
+            byte_array: [B; 0x5A, 0x1B], // byte arrays (B; infix)
+            [key]: 1200i64 // using key as variable by containing it in brackets
+        }.nbt();
+        let mut path = current_dir().unwrap();
+        path.push("target/bin.nbt");
+        let f = force_create(path);
+        let mut writer = BinaryNbtWriter::new(f);
+        writer.write_tag(None, comp).unwrap();
     }
 }

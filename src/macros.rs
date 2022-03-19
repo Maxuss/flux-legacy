@@ -25,8 +25,8 @@ macro_rules! convert_nbt_type {
     ([B;$($ele:tt),* $(,)*]) => {
         $crate::nbt::NbtTag::ByteArray(vec![$($ele,)*])
     };
-    ($closure:tt) => {
-        $closure
+    ($($tks:tt)*) => {
+        $($tks)*
     }
 }
 
@@ -46,11 +46,9 @@ macro_rules! convert_nbt_key {
 #[macro_export]
 macro_rules! nbt {
     (
-        $(
-        $k:tt: $v:tt
-        ),* $(,)*
+        $($k:tt: $v:tt),* $(,)*
     ) => {
-        Compound::new(HashMap::<String, NbtTag>::from([
+        $crate::nbt::Compound::new(std::collections::HashMap::<String, NbtTag>::from([
             $(
             ($crate::convert_nbt_key!($k).into(), $crate::convert_nbt_type!($v)),
             )*

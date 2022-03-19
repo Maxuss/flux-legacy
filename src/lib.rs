@@ -2,8 +2,10 @@ pub mod macros;
 pub mod modules;
 pub mod nbt;
 pub mod snbt;
+pub mod mc;
+pub mod prelude;
+pub mod chat;
 pub mod utils;
-
 #[cfg(test)]
 mod tests {
     use crate::nbt;
@@ -67,7 +69,7 @@ mod tests {
             byte_array: [B; 0x5A, 0x1B], // byte arrays (B; infix)
             [key]: 1200i64 // using key as variable by containing it in brackets
         }
-        .nbt();
+            .nbt();
         let mut path = current_dir().unwrap();
         path.push("target/bin.nbt");
         let f = force_create(path).await;

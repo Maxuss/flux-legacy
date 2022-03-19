@@ -1,6 +1,6 @@
-use crate::nbt::{NbtTag, NbtWriter};
 use std::fmt::Display;
 use std::io::Write;
+use crate::nbt::{NbtTag, NbtWriter};
 
 pub struct StringNbtWriter<W> {
     write: W,
@@ -100,6 +100,7 @@ where
                 let mut str = String::from("[L;");
                 self.write_vec(&mut str, v)?;
             }
+            _ => {}
         };
 
         Ok(())

@@ -126,8 +126,19 @@ impl IntoTag for Compound {
     }
 }
 
+impl<T> Into<NbtTag> for Option<T> where T: Into<NbtTag> {
+    fn into(self) -> NbtTag {
+        if let Some(tag) = self {
+            tag.into()
+        } else {
+            NbtTag::Empty
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum NbtTag {
+    Empty,
     Byte(i8),
     Short(i16),
     Int(i32),
@@ -228,6 +239,7 @@ impl NbtTag {
             NbtTag::Compound(_) => 0x0a,
             NbtTag::IntArray(_) => 0x0b,
             NbtTag::LongArray(_) => 0x0c,
+            _ => 0x00
         }
     }
 }
@@ -283,6 +295,7 @@ where
             }
             NbtTag::IntArray(v) => write_int_array(&v, &mut self.write)?,
             NbtTag::LongArray(v) => write_long_array(&v, &mut self.write)?,
+            _ => {}
         };
         Ok(())
     }
@@ -293,6 +306,9 @@ where
     W: Write,
 {
     fn write_tag(&mut self, name: Option<String>, tag: NbtTag) -> anyhow::Result<()> {
+        if tag == NbtTag::Empty {
+            return Ok(())
+        }
         self.write.write_u8(tag.id())?;
         if let Some(name) = name {
             write_string(name, &mut self.write)?;

@@ -1,3 +1,6 @@
+use proc_macro::TokenStream;
+use crate::modules::Module;
+
 pub mod macros;
 pub mod modules;
 pub mod nbt;
@@ -75,5 +78,17 @@ mod tests {
         let f = force_create(path).await;
         let mut writer = BinaryNbtWriter::new(f.into_std().await);
         writer.write_tag(None, comp).unwrap();
+    }
+}
+
+#[macro_export]
+macro_rules! declare_module {
+    ($typ:ident,$ctor:path) => {
+        extern "C" fn _plugin_ctor() -> *mut $crate::modules::Module {
+            let ctor: fn() -> $typ = $ctor;
+            let inst = ctor();
+            let boxed = Box::new(inst);
+            Box::into_raw(boxed)
+        }
     }
 }

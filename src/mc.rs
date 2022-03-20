@@ -4,6 +4,7 @@ pub mod material;
 pub mod item;
 pub mod enchant;
 pub mod block;
+pub mod entity;
 
 pub struct Identifier {
     namespace: String,

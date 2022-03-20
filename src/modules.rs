@@ -1,3 +1,4 @@
+use proc_macro::TokenStream;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -83,7 +84,13 @@ impl ModuleLoader {
         tokio::fs::create_dir_all(res_dir).await?;
         tokio::fs::create_dir_all(dp_dir).await?;
 
+
         // TODO: actual compilation, tbd later
         Ok(())
     }
+}
+
+pub trait Module {
+    fn load(&mut self);
+    fn init(&mut self);
 }

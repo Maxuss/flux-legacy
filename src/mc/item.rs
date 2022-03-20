@@ -52,7 +52,7 @@ impl Into<NbtTag> for ItemDisplay {
 
 macro_rules! meta_impl {
     ($(
-    $name:ident with $bname:ident {
+    $name:ident with $bname:ident $(default)? {
         $(
         $field:ident: $typ:ident $(<$generic:ident>)?
         ),* $(,)*

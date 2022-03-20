@@ -106,5 +106,6 @@ meta_impl! {
     DefaultMeta with DefaultMetaBuilder {
         Enchantments: Vec<Enchantment>,
         display: ItemDisplay,
+
     };
 }

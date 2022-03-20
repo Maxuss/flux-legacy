@@ -1,4 +1,3 @@
-use proc_macro::TokenStream;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 

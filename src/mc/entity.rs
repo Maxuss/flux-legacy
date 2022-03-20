@@ -1,4 +1,3 @@
-use std::ops::Deref;
 
 #[derive(Debug, Clone)]
 pub struct AttributeModifier {

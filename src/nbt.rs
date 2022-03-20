@@ -1,8 +1,9 @@
 use anyhow::bail;
-use byteorder::{BigEndian, WriteBytesExt};
+use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::collections::hash_map::IntoIter;
 use std::collections::HashMap;
 use std::io::Write;
+use uuid::Uuid;
 
 macro_rules! bare_fn {
     ($(
@@ -164,6 +165,23 @@ where
             .map(|(k, v)| (k.into(), v.into()))
             .collect::<HashMap<String, NbtTag>>();
         NbtTag::Compound(Compound::new(map))
+    }
+}
+
+impl Into<NbtTag> for bool {
+    fn into(self) -> NbtTag {
+        NbtTag::Byte(if self { 0x01 } else { 0x00 })
+    }
+}
+
+impl Into<NbtTag> for Uuid {
+    fn into(self) -> NbtTag {
+        let mut bytes = self.as_bytes().to_vec();
+        let first = bytes[0..3].as_ref().read_i32::<BigEndian>().unwrap();
+        let second = bytes[4..7].as_ref().read_i32::<BigEndian>().unwrap();
+        let third = bytes[8..11].as_ref().read_i32::<BigEndian>().unwrap();
+        let fourth = bytes[12..15].as_ref().read_i32::<BigEndian>().unwrap();
+        NbtTag::IntArray(vec![first, second, third, fourth])
     }
 }
 

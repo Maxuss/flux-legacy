@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::io::Write;
 use crate::nbt::{NbtTag, NbtWriter};
+use crate::utils::escape;
 
 pub struct StringNbtWriter<W> {
     write: W,
@@ -32,14 +33,13 @@ where
     where
         T: Display + PartialEq,
     {
-        for ele in &v {
+        let mut iter = v.iter().peekable();
+        while let Some(ele) = iter.next() {
             str.push_str(format!("{}", ele).as_str());
 
-            if let Some(last) = v.last() {
-                if *last != *ele {
-                    str.push(',')
-                }
-            }
+            if iter.peek().is_some() {
+                str.push_str(",");
+            };
         }
         str.push_str("]");
         self.write(str.to_owned())
@@ -51,6 +51,9 @@ where
     W: Write,
 {
     fn write_tag(&mut self, name: Option<String>, tag: NbtTag) -> anyhow::Result<()> {
+        if tag == NbtTag::Empty {
+            return Ok(())
+        };
         if let Some(name) = name {
             self.write(format!("{}:", name))?;
         };
@@ -66,30 +69,30 @@ where
                 let mut str = String::from("[");
                 self.write_vec(&mut str, v)?;
             }
-            NbtTag::String(v) => self.write(format!("\"{}\"", v))?,
+            NbtTag::String(v) => self.write(format!("\"{}\"", escape(v)))?,
             NbtTag::List(v) => {
                 self.write_str("[")?;
-                for ele in &v {
+                let mut iter = v.iter().peekable();
+                while let Some(ele) = iter.next() {
                     self.write_tag(None, ele.to_owned())?;
-                    if let Some(last) = v.last() {
-                        if *last != *ele {
-                            self.write_str(",")?;
-                        }
-                    }
+                    if iter.peek().is_some() {
+                        self.write_str(",");
+                    };
                 }
                 self.write_str("]")?;
             }
             NbtTag::Compound(comp) => {
                 self.write_str("{")?;
-                let iter = comp.iter();
-                for (k, v) in iter {
-                    self.write_tag(Some(k.to_owned()), v.to_owned())?;
-                    if let Some((last_k, last_v)) = comp.iter().last() {
-                        if last_k != k && last_v != v {
-                            self.write_str(",")?;
-                        }
+                let mut iter = comp.iter().peekable();
+                while let Some((k, v)) = iter.next() {
+                    if v.to_owned() == NbtTag::Empty {
+                        continue
                     }
-                }
+                    self.write_tag(Some(k.to_owned()), v.to_owned())?;
+                    if iter.peek().is_some() {
+                        self.write_str(",");
+                    }
+                };
                 self.write_str("}")?;
             }
             NbtTag::IntArray(v) => {

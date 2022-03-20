@@ -1,3 +1,5 @@
+use crate::nbt;
+use crate::nbt::NbtTag;
 
 #[derive(Debug, Clone)]
 pub struct AttributeModifier {
@@ -13,6 +15,19 @@ impl AttributeModifier {
             amount,
             operation: operation.into()
         }
+    }
+}
+
+impl Into<NbtTag> for AttributeModifier {
+    fn into(self) -> NbtTag {
+        let attr = self.attribute;
+        let amount = self.amount;
+        let oper = self.operation;
+        NbtTag::Compound(nbt! {
+            attribute: attr,
+            amount: amount,
+            operation: oper
+        })
     }
 }
 
@@ -73,5 +88,11 @@ impl ToString for Attribute {
             Attribute::FlyingSpeed => "generic.flying_speed",
             Attribute::ZombieSpawnReinforcements => "zombie.spawn_reinforcements"
         }.to_string()
+    }
+}
+
+impl Into<NbtTag> for Attribute {
+    fn into(self) -> NbtTag {
+        NbtTag::String(self.to_string())
     }
 }

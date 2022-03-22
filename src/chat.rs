@@ -201,7 +201,7 @@ impl Component {
     }
 
     pub fn hex_color(&mut self, color: u64) -> Self {
-        let str = format!("{:2X}", color);
+        let str = format!("#{:2X}", color);
         self.color = Some(TextColor::Hex(str));
         self.clone()
     }
@@ -299,4 +299,24 @@ pub enum NamedColor {
     Gray,
     DarkGray,
     Black,
+}
+
+#[macro_export]
+macro_rules! component {
+    // raw literals
+    ($obj:literal $(& $($recurse:tt)*)?) => {
+        Component::text($obj.to_string()) $(.append($crate::component!($($recurse)*)))?
+    };
+    // normal literals
+    ( $(@ $hex_color:literal)* $(@ $named_color:ident)* $($attr:ident)* $(! $not_attr:ident)* $obj:literal $(& $($recurse:tt)*)?) => {
+        Component::text($obj.to_string()) $(.$attr(true))* $(.$not_attr(false))* $(.color(NamedColor::$named_color))* $(.hex_color($hex_color))* $(.append($crate::component!($($recurse)*)))?
+    };
+    // variables
+    ( $(@ $hex_color:literal)* $(@ $named_color:ident)* $($attr:ident)* $(! $not_attr:ident)* # $obj:ident $(& $($recurse:tt)*)?) => {
+        Component::text($obj.to_string()) $(.$attr(true))* $(.$not_attr(false))* $(.color(NamedColor::$named_color))* $(.hex_color($hex_color))* $(.append($crate::component!($($recurse)*)))?
+    };
+    // expressions (no recursion here)
+    ( $(@ $hex_color:literal)* $(@ $named_color:ident)* $($attr:ident)* $(! $not_attr:ident)* # $obj:expr) => {
+        Component::text($obj.to_string()) $(.$attr(true))* $(.$not_attr(false))* $(.color(NamedColor::$named_color))* $(.hex_color($hex_color))*
+    };
 }

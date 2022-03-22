@@ -1,3 +1,5 @@
+extern crate core;
+
 pub mod chat;
 pub mod macros;
 pub mod mc;
@@ -9,8 +11,8 @@ pub mod utils;
 
 #[cfg(test)]
 mod tests {
-    use std::sync::{Mutex, MutexGuard};
     use crate::chat::{Component, NamedColor};
+    use crate::component;
     use crate::mc::commands::GiveCommand;
     use crate::mc::enchant::{Enchant, Enchantment};
     use crate::mc::entity::{Attribute, AttributeModifier, AttributeOperation, FullSelector, IntoSelector, Selector};
@@ -77,6 +79,12 @@ mod tests {
     fn test_selectors() {
         let sel = FullSelector::new(Selector::AllEntities, [("range", "50"), ("max", "1")]);
         println!("{}", sel.selector());
+    }
+
+    #[test]
+    fn component_macros() {
+        let comp = component! { @0xff0000 bold italic "Red, Bold, and Italic " & !bold "just red and italic" };
+        println!("{}", comp.to_string())
     }
 }
 

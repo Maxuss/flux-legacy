@@ -1,30 +1,36 @@
 use crate::nbt::NbtTag;
 
-pub mod material;
-pub mod item;
-pub mod enchant;
 pub mod block;
-pub mod entity;
 pub mod commands;
+pub mod enchant;
+pub mod entity;
+pub mod item;
+pub mod material;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct Identifier {
     namespace: String,
-    path: String
+    path: String,
 }
 
 impl Identifier {
-    pub fn new<S>(namespace: S, path: S) -> Self where S: Into<String> {
+    pub fn new<S>(namespace: S, path: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self {
             namespace: namespace.into(),
-            path: path.into()
+            path: path.into(),
         }
     }
 
-    pub fn minecraft<S>(path: S) -> Self where S: Into<String> {
+    pub fn minecraft<S>(path: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self {
             namespace: "minecraft".into(),
-            path: path.into()
+            path: path.into(),
         }
     }
 }

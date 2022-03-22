@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 
-use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[allow(non_camel_case_types)]
@@ -84,7 +85,6 @@ impl ModuleLoader {
 
         tokio::fs::create_dir_all(res_dir).await?;
         tokio::fs::create_dir_all(dp_dir).await?;
-
 
         // TODO: actual compilation, tbd later
         Ok(())

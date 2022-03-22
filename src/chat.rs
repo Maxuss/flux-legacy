@@ -1,5 +1,6 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
+
 use crate::mc::block::Location;
 use crate::nbt::NbtTag;
 use crate::utils::Keybind;
@@ -20,7 +21,7 @@ pub struct Component {
     reset: Option<bool>,
     color: Option<TextColor>,
     #[serde(flatten)]
-    contents: MessageContents
+    contents: MessageContents,
 }
 
 impl ToString for Component {
@@ -47,40 +48,56 @@ macro_rules! _fmt_impl {
 }
 
 impl Component {
-    pub fn text<S>(msg: S) -> Self where S: Into<String> {
+    pub fn text<S>(msg: S) -> Self
+    where
+        S: Into<String>,
+    {
         let mut df = Self::default();
-        df.contents = MessageContents::Plain {
-            text: msg.into()
-        };
+        df.contents = MessageContents::Plain { text: msg.into() };
         df.clone()
     }
 
-    pub fn translate<S, C>(msg: S, placeholders: Option<Vec<C>>) -> Self where S: Into<String>, C: AsComponent {
+    pub fn translate<S, C>(msg: S, placeholders: Option<Vec<C>>) -> Self
+    where
+        S: Into<String>,
+        C: AsComponent,
+    {
         let mut df = Self::default();
         df.contents = MessageContents::Translate(TranslatedMessage {
             translate: msg.into(),
-            with: placeholders.map(|it| it.iter().map(|e| e.as_component()).collect::<Vec<Component>>())
+            with: placeholders.map(|it| {
+                it.iter()
+                    .map(|e| e.as_component())
+                    .collect::<Vec<Component>>()
+            }),
         });
         df.clone()
     }
 
-    pub fn score<S>(name: S, objective: S, placeholder: Option<S>) -> Self where S: Into<String> {
+    pub fn score<S>(name: S, objective: S, placeholder: Option<S>) -> Self
+    where
+        S: Into<String>,
+    {
         let mut df = Self::default();
         df.contents = MessageContents::Score {
             score: ScoreboardMessage {
                 name: name.into(),
                 objective: objective.into(),
-                value: placeholder.map(|it| it.into())
-            }
+                value: placeholder.map(|it| it.into()),
+            },
         };
         df.clone()
     }
 
-    pub fn entity<S, C>(selector: S, separator: Option<C>) -> Self where S: Into<String>, C: AsComponent {
+    pub fn entity<S, C>(selector: S, separator: Option<C>) -> Self
+    where
+        S: Into<String>,
+        C: AsComponent,
+    {
         let mut df = Self::default();
         df.contents = MessageContents::Entity(Box::from(EntityMessage {
             selector: selector.into(),
-            separator: separator.map(|it| it.as_component())
+            separator: separator.map(|it| it.as_component()),
         }));
         df.clone()
     }
@@ -91,7 +108,16 @@ impl Component {
         df.clone()
     }
 
-    pub fn block_nbt<S, C>(path: S, position: Location, interpret: Option<bool>, separator: Option<C>) -> Self where S: Into<String>, C: AsComponent {
+    pub fn block_nbt<S, C>(
+        path: S,
+        position: Location,
+        interpret: Option<bool>,
+        separator: Option<C>,
+    ) -> Self
+    where
+        S: Into<String>,
+        C: AsComponent,
+    {
         let mut df = Self::default();
         df.contents = MessageContents::Nbt(Box::from(NbtMessage {
             nbt: path.into(),
@@ -99,12 +125,21 @@ impl Component {
             separator: separator.map(|it| it.as_component()),
             block: Some(position.to_string()),
             entity: None,
-            storage: None
+            storage: None,
         }));
         df.clone()
     }
 
-    pub fn entity_nbt<S, C>(path: S, selector: S, interpret: Option<bool>, separator: Option<C>) -> Self where S: Into<String>, C: AsComponent {
+    pub fn entity_nbt<S, C>(
+        path: S,
+        selector: S,
+        interpret: Option<bool>,
+        separator: Option<C>,
+    ) -> Self
+    where
+        S: Into<String>,
+        C: AsComponent,
+    {
         let mut df = Self::default();
         df.contents = MessageContents::Nbt(Box::from(NbtMessage {
             nbt: path.into(),
@@ -112,12 +147,21 @@ impl Component {
             separator: separator.map(|it| it.as_component()),
             block: None,
             entity: Some(selector.into()),
-            storage: None
+            storage: None,
         }));
         df.clone()
     }
 
-    pub fn storage_nbt<S, C>(path: S, storage: S, interpret: Option<bool>, separator: Option<C>) -> Self where S: Into<String>, C: AsComponent {
+    pub fn storage_nbt<S, C>(
+        path: S,
+        storage: S,
+        interpret: Option<bool>,
+        separator: Option<C>,
+    ) -> Self
+    where
+        S: Into<String>,
+        C: AsComponent,
+    {
         let mut df = Self::default();
         df.contents = MessageContents::Nbt(Box::from(NbtMessage {
             nbt: path.into(),
@@ -125,12 +169,15 @@ impl Component {
             separator: separator.map(|it| it.as_component()),
             block: None,
             entity: None,
-            storage: Some(storage.into())
+            storage: Some(storage.into()),
         }));
         df.clone()
     }
 
-    pub fn append<C>(&mut self, comp: C) -> Self where C: AsComponent {
+    pub fn append<C>(&mut self, comp: C) -> Self
+    where
+        C: AsComponent,
+    {
         if let Some(vec) = &mut self.extra {
             vec.push(comp.as_component());
             self.extra = Some(vec.to_owned())
@@ -169,7 +216,9 @@ pub enum MessageContents {
 
 impl Default for MessageContents {
     fn default() -> Self {
-        MessageContents::Plain {text: "".to_string()}
+        MessageContents::Plain {
+            text: "".to_string(),
+        }
     }
 }
 
@@ -181,26 +230,26 @@ pub struct NbtMessage {
     separator: Option<Component>,
     block: Option<String>,
     entity: Option<String>,
-    storage: Option<String>
+    storage: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KeyMessage {
-    keybind: String
+    keybind: String,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EntityMessage {
     selector: String,
-    separator: Option<Component>
+    separator: Option<Component>,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TranslatedMessage {
     translate: String,
-    with: Option<Vec<Component>>
+    with: Option<Vec<Component>>,
 }
 
 #[skip_serializing_none]
@@ -208,14 +257,14 @@ pub struct TranslatedMessage {
 pub struct ScoreboardMessage {
     name: String,
     objective: String,
-    value: Option<String>
+    value: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum TextColor {
     Named(NamedColor),
-    Hex(String)
+    Hex(String),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

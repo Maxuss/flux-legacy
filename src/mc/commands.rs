@@ -2,23 +2,37 @@ use crate::mc::Identifiable;
 use crate::prelude::{ItemStack, Material};
 
 pub trait CommandLike {
-    fn compile(&mut self) -> String where Self: Sized;
+    fn compile(&mut self) -> String
+    where
+        Self: Sized;
 }
 
 impl CommandLike for ItemStack {
-    fn compile(&mut self) -> String where Self: Sized {
+    fn compile(&mut self) -> String
+    where
+        Self: Sized,
+    {
         self.stringified()
     }
 }
 
 impl CommandLike for Material {
-    fn compile(&mut self) -> String where Self: Sized {
+    fn compile(&mut self) -> String
+    where
+        Self: Sized,
+    {
         self.id().to_string()
     }
 }
 
-impl<T> CommandLike for T where T: Into<String> + Clone {
-    fn compile(&mut self) -> String where Self: Sized {
+impl<T> CommandLike for T
+where
+    T: Into<String> + Clone,
+{
+    fn compile(&mut self) -> String
+    where
+        Self: Sized,
+    {
         Clone::clone(self).into()
     }
 }

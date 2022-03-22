@@ -1,8 +1,9 @@
-use anyhow::bail;
-use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::collections::hash_map::IntoIter;
 use std::collections::HashMap;
 use std::io::Write;
+
+use anyhow::bail;
+use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use uuid::Uuid;
 
 macro_rules! bare_fn {
@@ -127,7 +128,10 @@ impl IntoTag for Compound {
     }
 }
 
-impl<T> Into<NbtTag> for Option<T> where T: Into<NbtTag> {
+impl<T> Into<NbtTag> for Option<T>
+where
+    T: Into<NbtTag>,
+{
     fn into(self) -> NbtTag {
         if let Some(tag) = self {
             tag.into()
@@ -257,7 +261,7 @@ impl NbtTag {
             NbtTag::Compound(_) => 0x0a,
             NbtTag::IntArray(_) => 0x0b,
             NbtTag::LongArray(_) => 0x0c,
-            _ => 0x00
+            _ => 0x00,
         }
     }
 }
@@ -325,7 +329,7 @@ where
 {
     fn write_tag(&mut self, name: Option<String>, tag: NbtTag) -> anyhow::Result<()> {
         if tag == NbtTag::Empty {
-            return Ok(())
+            return Ok(());
         }
         self.write.write_u8(tag.id())?;
         if let Some(name) = name {

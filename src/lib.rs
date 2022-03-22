@@ -1,10 +1,10 @@
+pub mod chat;
 pub mod macros;
+pub mod mc;
 pub mod modules;
 pub mod nbt;
-pub mod snbt;
-pub mod mc;
 pub mod prelude;
-pub mod chat;
+pub mod snbt;
 pub mod utils;
 
 #[cfg(test)]
@@ -23,7 +23,11 @@ mod tests {
         meta.enchants(vec![Enchantment::new(Enchant::Sharpness, 5)]);
         meta.unbreakable(true);
         let mut display = ItemDisplay::new();
-        display.name(Component::text("Amazing sword").color(NamedColor::Gold).bold(true));
+        display.name(
+            Component::text("Amazing sword")
+                .color(NamedColor::Gold)
+                .bold(true),
+        );
         meta.display(display);
         item.meta(ItemMeta::Default(meta));
         println!("{}", item.stringified());
@@ -51,5 +55,5 @@ macro_rules! declare_module {
             let boxed = Box::new(inst);
             Box::into_raw(boxed)
         }
-    }
+    };
 }

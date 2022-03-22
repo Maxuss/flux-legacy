@@ -1,20 +1,21 @@
 #![allow(non_snake_case)]
 
 use uuid::Uuid;
+
 use crate::chat::Component;
-use crate::mc::material::Material;
-use crate::nbt::{NbtTag, NbtWriter};
 use crate::mc::enchant::Enchantment;
 use crate::mc::entity::AttributeModifier;
+use crate::mc::material::Material;
 use crate::mc::{Identifiable, Identifier};
 use crate::nbt;
+use crate::nbt::{NbtTag, NbtWriter};
 use crate::snbt::StringNbtWriter;
 
 #[derive(Debug, Clone)]
 pub struct ItemStack {
     mat: Material,
     meta: ItemMeta,
-    amount: i8
+    amount: i8,
 }
 
 impl ItemStack {
@@ -22,7 +23,7 @@ impl ItemStack {
         Self {
             mat,
             meta: ItemMeta::Default(DefaultMeta::new()),
-            amount: amount.unwrap_or_else(|| { 1 })
+            amount: amount.unwrap_or_else(|| 1),
         }
     }
 
@@ -36,33 +37,43 @@ impl ItemStack {
         self.meta.write_meta(&mut str).unwrap();
         let str = String::from_utf8(buf).unwrap();
 
-        format!("{mat}{meta} {amount}", mat=self.mat.id().to_string(), meta=str, amount=self.amount)
+        format!(
+            "{mat}{meta} {amount}",
+            mat = self.mat.id().to_string(),
+            meta = str,
+            amount = self.amount
+        )
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum ItemMeta {
     Default(DefaultMeta),
-    Skull(SkullMeta)
+    Skull(SkullMeta),
 }
 
 impl MetaContainer for ItemMeta {
-    fn write_meta<W>(&mut self, writer: &mut W) -> anyhow::Result<()> where W: NbtWriter {
+    fn write_meta<W>(&mut self, writer: &mut W) -> anyhow::Result<()>
+    where
+        W: NbtWriter,
+    {
         match self {
             ItemMeta::Default(m) => m.write_meta(writer),
-            ItemMeta::Skull(m) => m.write_meta(writer)
+            ItemMeta::Skull(m) => m.write_meta(writer),
         }
     }
 }
 
 pub trait MetaContainer {
-    fn write_meta<W>(&mut self, writer: &mut W) -> anyhow::Result<()> where W: NbtWriter;
+    fn write_meta<W>(&mut self, writer: &mut W) -> anyhow::Result<()>
+    where
+        W: NbtWriter;
 }
 
 #[derive(Default, Debug, Clone)]
 pub struct ItemDisplay {
     name: Option<Component>,
-    lore: Option<Vec<Component>>
+    lore: Option<Vec<Component>>,
 }
 
 impl ItemDisplay {
@@ -95,14 +106,14 @@ impl Into<NbtTag> for ItemDisplay {
 #[derive(Debug, Clone, PartialEq)]
 pub enum SkullOwner {
     Username(String),
-    Base64(SkullData)
+    Base64(SkullData),
 }
 
 impl Into<NbtTag> for SkullOwner {
     fn into(self) -> NbtTag {
         match self {
             SkullOwner::Username(str) => str.into(),
-            SkullOwner::Base64(data) => data.into()
+            SkullOwner::Base64(data) => data.into(),
         }
     }
 }
@@ -111,7 +122,7 @@ impl Into<NbtTag> for SkullOwner {
 pub struct SkullData {
     id: Uuid,
     name: String,
-    texture: String
+    texture: String,
 }
 
 impl SkullData {
@@ -119,11 +130,7 @@ impl SkullData {
         let id = Uuid::new_v4();
         let rand_bytes: [u8; 32] = rand::random();
         let name = base64::encode(rand_bytes);
-        Self {
-            id,
-            name,
-            texture
-        }
+        Self { id, name, texture }
     }
 }
 
@@ -234,9 +241,9 @@ meta_impl! {
     }
 }
 
-pub const FLAG_HIDE_ENCHANTMENTS: i32 =  0b000001;
-pub const FLAG_HIDE_ATTRIBUTES: i32 =    0b000010;
-pub const FLAG_HIDE_UNBREAKABLE: i32 =   0b000100;
-pub const FLAG_HIDE_DESTROY: i32 =       0b001000;
-pub const FLAG_HIDE_PLACE: i32 =         0b010000;
-pub const FLAG_HIDE_DYED: i32 =          0b100000;
+pub const FLAG_HIDE_ENCHANTMENTS: i32 = 0b000001;
+pub const FLAG_HIDE_ATTRIBUTES: i32 = 0b000010;
+pub const FLAG_HIDE_UNBREAKABLE: i32 = 0b000100;
+pub const FLAG_HIDE_DESTROY: i32 = 0b001000;
+pub const FLAG_HIDE_PLACE: i32 = 0b010000;
+pub const FLAG_HIDE_DYED: i32 = 0b100000;

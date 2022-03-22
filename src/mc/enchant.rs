@@ -1,4 +1,5 @@
 use convert_case::{Case, Casing};
+
 use crate::mc::{Identifiable, Identifier};
 use crate::nbt;
 use crate::nbt::NbtTag;
@@ -67,14 +68,14 @@ impl Identifiable for Enchant {
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Enchantment {
     typ: Enchant,
-    lvl: i32
+    lvl: i32,
 }
 
 impl Enchantment {
     pub fn new(enchant: Enchant, level: i32) -> Self {
         Self {
             typ: enchant,
-            lvl: level
+            lvl: level,
         }
     }
 }

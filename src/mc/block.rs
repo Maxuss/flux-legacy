@@ -4,13 +4,19 @@ pub trait ToCoord {
     fn to_coord(&self) -> Coordinate;
 }
 
-impl<C> ToCoord for C where C: Into<Coordinate> + Clone {
+impl<C> ToCoord for C
+where
+    C: Into<Coordinate> + Clone,
+{
     fn to_coord(&self) -> Coordinate {
         self.to_owned().into()
     }
 }
 
-impl<C> From<&C> for Coordinate where C: Into<Coordinate> + Clone {
+impl<C> From<&C> for Coordinate
+where
+    C: Into<Coordinate> + Clone,
+{
     fn from(c: &C) -> Self {
         Clone::clone(c).into()
     }
@@ -20,15 +26,18 @@ impl<C> From<&C> for Coordinate where C: Into<Coordinate> + Clone {
 pub struct Location {
     x: Coordinate,
     y: Coordinate,
-    z: Coordinate
+    z: Coordinate,
 }
 
 impl Location {
-    pub fn new<C>(x: C, y: C, z: C) -> Self where C: ToCoord {
+    pub fn new<C>(x: C, y: C, z: C) -> Self
+    where
+        C: ToCoord,
+    {
         Self {
             x: x.to_coord(),
             y: y.to_coord(),
-            z: z.to_coord()
+            z: z.to_coord(),
         }
     }
 
@@ -36,7 +45,7 @@ impl Location {
         Self {
             x: Coordinate::relative(x),
             y: Coordinate::relative(y),
-            z: Coordinate::relative(z)
+            z: Coordinate::relative(z),
         }
     }
 
@@ -44,7 +53,7 @@ impl Location {
         Self {
             x: Coordinate::local(x),
             y: Coordinate::local(y),
-            z: Coordinate::local(z)
+            z: Coordinate::local(z),
         }
     }
 }
@@ -75,7 +84,7 @@ impl FromStr for Location {
 pub struct Coordinate {
     pos: i32,
     relative: bool,
-    local: bool
+    local: bool,
 }
 
 impl Coordinate {
@@ -83,7 +92,7 @@ impl Coordinate {
         Self {
             pos,
             relative: false,
-            local: false
+            local: false,
         }
     }
 
@@ -91,7 +100,7 @@ impl Coordinate {
         Self {
             pos,
             relative: true,
-            local: false
+            local: false,
         }
     }
 
@@ -99,7 +108,7 @@ impl Coordinate {
         Self {
             pos,
             relative: false,
-            local: true
+            local: true,
         }
     }
 }
@@ -133,20 +142,20 @@ impl FromStr for Coordinate {
             match c {
                 '~' => relative = true,
                 '^' => local = true,
-                _ => out.push(c)
+                _ => out.push(c),
             };
         });
         if out.is_empty() {
             Ok(Self {
                 pos: 0,
                 relative,
-                local
+                local,
             })
         } else {
             Ok(Self {
                 pos: i32::from_str(&out).unwrap(),
                 relative,
-                local
+                local,
             })
         }
     }

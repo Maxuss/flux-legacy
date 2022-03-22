@@ -33,7 +33,7 @@ pub enum Keybind {
     Screenshot,
     SmoothCamera,
     Fullscreen,
-    ChangePerspective
+    ChangePerspective,
 }
 
 impl Keybind {
@@ -72,7 +72,7 @@ impl Keybind {
             Keybind::Screenshot => "key.screenshot",
             Keybind::SmoothCamera => "key.smoothCamera",
             Keybind::Fullscreen => "key.fullscreen",
-            Keybind::ChangePerspective => "key.togglePerspective"
+            Keybind::ChangePerspective => "key.togglePerspective",
         })
     }
 }
@@ -86,8 +86,8 @@ pub fn escape(src: String) -> String {
             '\t' => escaped += "\\t",
             '"' => escaped += "\\\"",
             '\\' => escaped += "\\",
-            c => escaped.push(c)
+            c => escaped.push(c),
         };
-    };
+    }
     escaped
 }

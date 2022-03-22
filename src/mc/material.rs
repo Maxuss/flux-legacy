@@ -1,4 +1,5 @@
 use convert_case::{Case, Casing};
+
 use crate::mc::{Identifiable, Identifier};
 use crate::nbt::NbtTag;
 
@@ -1231,7 +1232,7 @@ pub enum Material {
     SweetBerries,
     GlowBerries,
     Honeycomb,
-    HoneyBottle
+    HoneyBottle,
 }
 
 impl Into<NbtTag> for Material {

@@ -1,5 +1,6 @@
 use std::fmt::Display;
 use std::io::Write;
+
 use crate::nbt::{NbtTag, NbtWriter};
 use crate::utils::escape;
 
@@ -52,7 +53,7 @@ where
 {
     fn write_tag(&mut self, name: Option<String>, tag: NbtTag) -> anyhow::Result<()> {
         if tag == NbtTag::Empty {
-            return Ok(())
+            return Ok(());
         };
         if let Some(name) = name {
             self.write(format!("{}:", name))?;
@@ -86,13 +87,13 @@ where
                 let mut iter = comp.iter().peekable();
                 while let Some((k, v)) = iter.next() {
                     if v.to_owned() == NbtTag::Empty {
-                        continue
+                        continue;
                     }
                     self.write_tag(Some(k.to_owned()), v.to_owned())?;
                     if iter.peek().is_some() {
                         self.write_str(",")?;
                     }
-                };
+                }
                 self.write_str("}")?;
             }
             NbtTag::IntArray(v) => {

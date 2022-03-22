@@ -78,12 +78,12 @@ where
 #[derive(Debug, Clone)]
 pub struct AttributeModifier {
     attribute: Attribute,
-    amount: i32,
+    amount: f64,
     operation: i32,
 }
 
 impl AttributeModifier {
-    pub fn new(attribute: Attribute, operation: AttributeOperation, amount: i32) -> Self {
+    pub fn new(attribute: Attribute, operation: AttributeOperation, amount: f64) -> Self {
         Self {
             attribute,
             amount,

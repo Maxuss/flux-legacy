@@ -9,12 +9,14 @@ pub mod utils;
 
 #[cfg(test)]
 mod tests {
+    use std::sync::{Mutex, MutexGuard};
     use crate::chat::{Component, NamedColor};
     use crate::mc::commands::GiveCommand;
     use crate::mc::enchant::{Enchant, Enchantment};
-    use crate::mc::entity::{FullSelector, IntoSelector, Selector};
-    use crate::mc::item::DefaultMeta;
+    use crate::mc::entity::{Attribute, AttributeModifier, AttributeOperation, FullSelector, IntoSelector, Selector};
+    use crate::mc::item::{DefaultMeta, FLAG_HIDE_ATTRIBUTES, FLAG_HIDE_DESTROY, FLAG_HIDE_DYED, FLAG_HIDE_ENCHANTMENTS, FLAG_HIDE_PLACE, FLAG_HIDE_UNBREAKABLE};
     use crate::prelude::*;
+    use crate::utils::Keybind;
 
     #[test]
     fn test_items() {
@@ -35,7 +37,39 @@ mod tests {
 
     #[test]
     fn give_command() {
-        let mut cmd = GiveCommand::new("@p", ItemStack::new(Material::DiamondSword, None));
+        let mut item = ItemStack::new(
+            Material::DiamondChestplate, None);
+        item.meta(ItemMeta::Default(
+            DefaultMeta::new()
+                .display(
+                    ItemDisplay::new()
+                        .name(
+                            Component::text("Epic Chestplate")
+                                .color(NamedColor::Gold)
+                                .italic(false))
+                        .lore(
+                            vec![
+                                Component::text("Strength: ")
+                                    .color(NamedColor::Gray)
+                                    .italic(false)
+                                    .append(Component::text("+10").color(NamedColor::Green)),
+                                Component::text(""),
+                                Component::text("Press ")
+                                    .color(NamedColor::Gray)
+                                    .append(Component::keybind(Keybind::Attack).color(NamedColor::Green))
+                                    .append(Component::text(" to attack!").color(NamedColor::Gray))
+                                    .italic(false)
+                            ]))
+                .unbreakable(true)
+                .hide_flags(
+                    FLAG_HIDE_DYED | FLAG_HIDE_ATTRIBUTES |
+                        FLAG_HIDE_DESTROY | FLAG_HIDE_PLACE |
+                        FLAG_HIDE_ENCHANTMENTS | FLAG_HIDE_UNBREAKABLE)
+                .attributes(vec![AttributeModifier::new(Attribute::MovementSpeed, AttributeOperation::Multiply, 1.23)])
+                .enchants(vec![Enchantment::new(Enchant::Protection, 4)])
+        ));
+
+        let mut cmd = GiveCommand::new("@p", item);
         println!("{}", cmd.compile())
     }
 

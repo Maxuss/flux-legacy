@@ -9,6 +9,19 @@ pub trait AsComponent {
     fn as_component(&self) -> Component;
 }
 
+impl<S> AsComponent for S where S: Into<String> + Clone {
+    fn as_component(&self) -> Component {
+        let str: String = Clone::clone(self).into();
+        Component::text(str)
+    }
+}
+
+impl From<&str> for Component {
+    fn from(str: &str) -> Self {
+        str.as_component()
+    }
+}
+
 #[skip_serializing_none]
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Component {
@@ -176,13 +189,13 @@ impl Component {
 
     pub fn append<C>(&mut self, comp: C) -> Self
     where
-        C: AsComponent,
+        C: Into<Component>,
     {
         if let Some(vec) = &mut self.extra {
-            vec.push(comp.as_component());
+            vec.push(comp.into());
             self.extra = Some(vec.to_owned())
         } else {
-            self.extra = Some(vec![comp.as_component()])
+            self.extra = Some(vec![comp.into()])
         }
         self.clone()
     }

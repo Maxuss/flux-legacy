@@ -13,14 +13,16 @@ use crate::snbt::StringNbtWriter;
 #[derive(Debug, Clone)]
 pub struct ItemStack {
     mat: Material,
-    meta: ItemMeta
+    meta: ItemMeta,
+    amount: i8
 }
 
 impl ItemStack {
-    pub fn new(mat: Material) -> Self {
+    pub fn new(mat: Material, amount: Option<i8>) -> Self {
         Self {
             mat,
-            meta: ItemMeta::Default(DefaultMeta::new())
+            meta: ItemMeta::Default(DefaultMeta::new()),
+            amount: amount.unwrap_or_else(|| { 1 })
         }
     }
 
@@ -34,7 +36,7 @@ impl ItemStack {
         self.meta.write_meta(&mut str).unwrap();
         let str = String::from_utf8(buf).unwrap();
 
-        format!("{mat}{meta}", mat=self.mat.id().to_string(), meta=str)
+        format!("{mat}{meta} {amount}", mat=self.mat.id().to_string(), meta=str, amount=self.amount)
     }
 }
 

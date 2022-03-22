@@ -2,8 +2,9 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use crate::nbt;
 use crate::nbt::NbtTag;
+use crate::prelude::CommandLike;
 
-pub trait IntoSelector {
+pub trait IntoSelector: Clone {
     fn selector(&self) -> String;
 }
 

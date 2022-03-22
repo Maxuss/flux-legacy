@@ -22,7 +22,7 @@ mod tests {
 
     #[test]
     fn test_items() {
-        let mut item = ItemStack::new(Material::DiamondSword);
+        let mut item = ItemStack::new(Material::DiamondSword, None);
         let mut meta = DefaultMeta::new();
         meta.enchants(vec![Enchantment::new(Enchant::Sharpness, 5)]);
         meta.unbreakable(true);
@@ -35,7 +35,7 @@ mod tests {
 
     #[test]
     fn give_command() {
-        let mut cmd = GiveCommand::builder().amount(None).item(ItemStack::new(Material::DiamondSword));
+        let mut cmd = GiveCommand::new("@p", ItemStack::new(Material::DiamondSword, None));
         println!("{}", cmd.compile())
     }
 

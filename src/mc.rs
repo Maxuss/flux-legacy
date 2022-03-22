@@ -5,6 +5,7 @@ pub mod item;
 pub mod enchant;
 pub mod block;
 pub mod entity;
+pub mod commands;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct Identifier {

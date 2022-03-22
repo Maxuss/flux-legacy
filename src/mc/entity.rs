@@ -1,5 +1,68 @@
+use std::collections::HashMap;
+use std::hash::Hash;
 use crate::nbt;
 use crate::nbt::NbtTag;
+
+pub trait IntoSelector {
+    fn selector(&self) -> String;
+}
+
+impl<S> IntoSelector for S where S: Into<String> + Clone {
+    fn selector(&self) -> String {
+        Clone::clone(self).into()
+    }
+}
+
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub enum Selector {
+    AllEntities,
+    AllPlayers,
+    NearestPlayer,
+    RandomPlayer,
+    Executor
+}
+
+impl IntoSelector for Selector {
+    fn selector(&self) -> String {
+        match *self {
+            Selector::AllEntities => "@e",
+            Selector::AllPlayers => "@a",
+            Selector::NearestPlayer => "@p",
+            Selector::RandomPlayer => "@r",
+            Selector::Executor => "@c"
+        }.to_string()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FullSelector<S>(Selector, HashMap<S, S>);
+
+impl<S> FullSelector<S> where S: Into<String> + Eq + Hash {
+    pub fn new<const N: usize>(selector: Selector, params: [(S, S); N]) -> Self {
+        Self(selector, HashMap::from(params))
+    }
+}
+
+impl<S> IntoSelector for FullSelector<S> where S: Into<String> + Clone {
+    fn selector(&self) -> String {
+        let mut buf = String::new();
+        let mut iter = self.1.iter().peekable();
+        if iter.peek().is_some() {
+            buf.push_str("[");
+            while let Some((k, v)) = iter.next() {
+                let ks: String = Clone::clone(k).into();
+                let vs: String = Clone::clone(v).into();
+                buf.push_str(format!("{}={}", ks, vs).as_str());
+                if iter.peek().is_some() {
+                    buf.push_str(",");
+                } else {
+                    buf.push_str("]");
+                }
+            }
+        }
+        format!("{}{}", self.0.selector(), buf)
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct AttributeModifier {

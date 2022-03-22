@@ -6,21 +6,23 @@ pub mod mc;
 pub mod prelude;
 pub mod chat;
 pub mod utils;
+
 #[cfg(test)]
 mod tests {
     use crate::nbt;
-    use crate::nbt::{BinaryNbtWriter, Compound, IntoTag, NbtTag, NbtWriter};
     use crate::snbt::StringNbtWriter;
     use std::collections::HashMap;
     use std::env::current_dir;
     use crate::chat::{Component, NamedColor};
+    use crate::mc::commands::GiveCommand;
     use crate::mc::enchant::{Enchant, Enchantment};
-    use crate::mc::item::{DefaultMeta, ItemDisplay, ItemMeta};
-    use crate::prelude::{ItemStack, Material};
+    use crate::mc::entity::{FullSelector, IntoSelector, Selector};
+    use crate::mc::item::DefaultMeta;
+    use crate::prelude::*;
 
     #[test]
     fn test_items() {
-        let mut item = ItemStack::new(Material::DiamondSword, 1);
+        let mut item = ItemStack::new(Material::DiamondSword);
         let mut meta = DefaultMeta::new();
         meta.enchants(vec![Enchantment::new(Enchant::Sharpness, 5)]);
         meta.unbreakable(true);
@@ -30,6 +32,20 @@ mod tests {
         item.meta(ItemMeta::Default(meta));
         println!("{}", item.stringified());
     }
+
+    #[test]
+    fn give_command() {
+        let mut cmd = GiveCommand::builder().amount(None).item(ItemStack::new(Material::DiamondSword));
+        println!("{}", cmd.compile())
+    }
+
+    #[test]
+    fn test_selectors() {
+        let mut sel = FullSelector::new(Selector::AllEntities, [("range", "50"), ("max", "1")]);
+        println!("{}", sel.selector());
+    }
+
+
 }
 
 #[macro_export]

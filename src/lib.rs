@@ -9,10 +9,6 @@ pub mod utils;
 
 #[cfg(test)]
 mod tests {
-    use crate::nbt;
-    use crate::snbt::StringNbtWriter;
-    use std::collections::HashMap;
-    use std::env::current_dir;
     use crate::chat::{Component, NamedColor};
     use crate::mc::commands::GiveCommand;
     use crate::mc::enchant::{Enchant, Enchantment};
@@ -41,11 +37,9 @@ mod tests {
 
     #[test]
     fn test_selectors() {
-        let mut sel = FullSelector::new(Selector::AllEntities, [("range", "50"), ("max", "1")]);
+        let sel = FullSelector::new(Selector::AllEntities, [("range", "50"), ("max", "1")]);
         println!("{}", sel.selector());
     }
-
-
 }
 
 #[macro_export]

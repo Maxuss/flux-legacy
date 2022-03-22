@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::chat::Component;
 use crate::mc::material::Material;
 use crate::nbt::{NbtTag, NbtWriter};
-use crate::mc::enchant::{Enchant, Enchantment};
+use crate::mc::enchant::Enchantment;
 use crate::mc::entity::AttributeModifier;
 use crate::mc::{Identifiable, Identifier};
 use crate::nbt;

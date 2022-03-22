@@ -78,7 +78,6 @@ impl Keybind {
 }
 
 pub fn escape(src: String) -> String {
-    use std::fmt::Write;
     let mut escaped = String::with_capacity(src.len());
     for c in src.chars() {
         match c {

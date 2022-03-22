@@ -1,5 +1,4 @@
-use crate::mc::{Identifiable, Identifier};
-use crate::mc::entity::IntoSelector;
+use crate::mc::Identifiable;
 use crate::prelude::{ItemStack, Material};
 
 pub trait CommandLike {

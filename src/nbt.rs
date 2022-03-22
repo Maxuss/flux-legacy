@@ -176,7 +176,7 @@ impl Into<NbtTag> for bool {
 
 impl Into<NbtTag> for Uuid {
     fn into(self) -> NbtTag {
-        let mut bytes = self.as_bytes().to_vec();
+        let bytes = self.as_bytes().to_vec();
         let first = bytes[0..3].as_ref().read_i32::<BigEndian>().unwrap();
         let second = bytes[4..7].as_ref().read_i32::<BigEndian>().unwrap();
         let third = bytes[8..11].as_ref().read_i32::<BigEndian>().unwrap();

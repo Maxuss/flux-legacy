@@ -76,7 +76,7 @@ where
                 while let Some(ele) = iter.next() {
                     self.write_tag(None, ele.to_owned())?;
                     if iter.peek().is_some() {
-                        self.write_str(",");
+                        self.write_str(",")?;
                     };
                 }
                 self.write_str("]")?;
@@ -90,7 +90,7 @@ where
                     }
                     self.write_tag(Some(k.to_owned()), v.to_owned())?;
                     if iter.peek().is_some() {
-                        self.write_str(",");
+                        self.write_str(",")?;
                     }
                 };
                 self.write_str("}")?;

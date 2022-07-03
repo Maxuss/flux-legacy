@@ -41,7 +41,7 @@ impl ItemStack {
             "{mat}{meta} {amount}",
             mat = self.mat.id().to_string(),
             meta = str,
-            amount = self.amount
+            amount = self.amount.to_string()
         )
     }
 }
@@ -182,54 +182,20 @@ macro_rules! meta_impl {
                         PickupDelay by pickup_delay: i32,
                         Age by age: i16,
                         $(
-                            $def_field by $def_byname: $def_typ $(<$def_generic>)?
+                            $def_field by $def_byname: $def_typ $(<$def_generic>)?,
                         )*
                     }
                 }
             )?
-            $(
-                #[derive(Debug, Clone)]
-                pub struct $name {
+            $crate::__meta_struct! {
+                $(
+                $name {
                     $(
-                    $byname:Option<$typ $(<$generic>)?>,
-                    )*
+                        $field by $byname: $typ $(<$generic>)?
+                    ),*
                 }
-
-                impl $name {
-                    pub fn new() -> Self {
-                        $name {
-                            $(
-                            $byname: None,
-                            )*
-                        }
-                    }
-
-                    $(
-                    pub fn $byname(&mut self, value: $typ $(<$generic>)*) -> Self {
-                        self.$byname = Some(value);
-                        self.clone()
-                    }
-
-                    )*
-                }
-
-                impl MetaContainer for $name {
-                    fn write_meta<W>(&mut self, writer: &mut W) -> anyhow::Result<()> where W: NbtWriter {
-                        $(
-                        let $byname: NbtTag = Clone::clone(&self.$byname).into();
-                        )*
-                        let comp = $crate::nbt::NbtTag::Compound($crate::nbt! {
-                            $(
-                            $field: $byname,
-                            )*
-                        });
-
-                        writer.write_tag(None, comp)?;
-
-                        Ok(())
-                    }
-                }
-            )?
+                )*
+            }
         )*
     }
 }
@@ -247,3 +213,13 @@ pub const FLAG_HIDE_UNBREAKABLE: i32 = 0b000100;
 pub const FLAG_HIDE_DESTROY: i32 = 0b001000;
 pub const FLAG_HIDE_PLACE: i32 = 0b010000;
 pub const FLAG_HIDE_DYED: i32 = 0b100000;
+
+#[repr(i32)]
+pub enum ItemFlag {
+    Enchantments = 0b000001,
+    Attributes = 0b000010,
+    Unbreakable = 0b000100,
+    CanDestroy = 0b001000,
+    CanPlace = 0b010000,
+    Dye = 0b100000
+}

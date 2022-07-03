@@ -1,4 +1,21 @@
 use std::str::FromStr;
+use crate::nbt::NbtTag;
+use crate::utils::Vec3D;
+
+macro_rules! num_coord {
+    ($($num:ident),+) => {
+        $(
+            impl ToCoord for $num {
+                fn to_coord(&self) -> Coordinate {
+                    return Coordinate::new(*self as i32)
+                }
+            }
+
+        )+
+    };
+}
+
+num_coord!(u8,u16,u32,u64,i8,i16,i32,i64);
 
 pub trait ToCoord {
     fn to_coord(&self) -> Coordinate;
@@ -27,6 +44,16 @@ pub struct Location {
     x: Coordinate,
     y: Coordinate,
     z: Coordinate,
+}
+
+impl Into<Vec3D> for Location {
+    fn into(self) -> Vec3D {
+        assert!(!self.x.local && self.x.relative, "Can not convert location into a 3-Double Vector if it has local/relative coordinates!");
+        assert!(!self.y.local && self.y.relative, "Can not convert location into a 3-Double Vector if it has local/relative coordinates!");
+        assert!(!self.z.local && self.z.relative, "Can not convert location into a 3-Double Vector if it has local/relative coordinates!");
+
+        Vec3D(self.x.pos as f64, self.y.pos as f64, self.z.pos as f64)
+    }
 }
 
 impl Location {

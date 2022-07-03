@@ -40,7 +40,7 @@ where
 macro_rules! declare_commands {
     (
         $(
-            $(generic <$gen_type:ident: $gen_bound:ident $(<$_i_gen:ident>)? >)? command $command_name:literal $struct_name:ident($(
+            $(generic [$gen_type:ident : $gen_bound:ident $([$_i_gen:ident])?])? command $command_name:literal $struct_name:ident($(
                 $(opt $opt_type:ident $opt_name:ident)?
                 $(req $def_type:ident $def_name:ident)?
             ),* $(,)*)
@@ -116,7 +116,7 @@ macro_rules! declare_commands {
 }
 
 declare_commands! {
-    generic<T: Into<String> > command "give" GiveCommand(
+    generic[T: Into[String]] command "give" GiveCommand(
         req T selector,
         req ItemStack item
     );

@@ -278,6 +278,34 @@ macro_rules! breedable {
     };
 }
 
+macro_rules! raid_entity {
+    (
+        $(
+            $name:ident {
+                $(
+                $mcname:ident by $fname:ident: $typ:ident $(<$generic:ident>)?
+                ),* $(,)*
+            }
+        );* $(;)*
+    ) => {
+        mobs! {
+            $(
+                $name {
+                    CanJoinRaid by can_join_raid: bool,
+                    PatrolLeader by is_patrol_leader: bool,
+                    Patrolling by is_patrolling: bool,
+                    PatrolTarget by patrol_target: Location,
+                    RaidId by raid_id: i32,
+                    Wave by wave_spawned: i32,
+                    $(
+                        $mcname by $fname: $typ $(<$generic>)?
+                    ),*
+                }
+            );*
+        }
+    };
+}
+
 macro_rules! horse {
     (
         $(
@@ -359,7 +387,38 @@ mobs! {
         AngerTime by anger_ticks: i32,
         AngryAt by angry_at: Uuid,
         // todo: the carried block state
-    }
+    };
+
+    Endermite {
+        Lifetime by lifetime: i32,
+    };
+
+    Ghast {
+        ExplosionPower by explosion_radius: u8,
+    };
+
+    GlowSquid {
+        DarkTicksRemaining by until_starts_glowing: i32,
+    };
+
+    IronGolem {
+        AngerTime by anger_ticks: i32,
+        AngryAt by angry_at: Uuid,
+        PlayerCreated by is_player_made: bool,
+    };
+
+
+}
+
+raid_entity! {
+    Evoker {
+        SpellTicks by ticks_until_spell: i32
+    };
+
+    Illusioner {
+        SpellTicks by ticks_until_spell: i32
+    };
+
 }
 
 breedable! {
@@ -393,6 +452,30 @@ breedable! {
         EggLayTime by until_lays_egg: i32,
         IsChickenJockey by is_jockey: bool
     };
+
+    Fox {
+        Crouching by is_crouching: bool,
+        Sitting by is_sitting: bool,
+        Sleeping by is_sleeping: bool,
+        Trusted by trusted_player: Vec<Uuid>,
+        Type by color: FoxColor,
+    };
+
+    Frog {
+        variant by color: FrogColor,
+    };
+
+    Goat {
+        HasLeftHorn by has_left_horn: bool,
+        HasRightHorn by has_right_horn: bool,
+        IsScreamingGoat by can_scream: bool,
+    };
+
+    Hoglin {
+        CannotBeHunted by do_piglins_ignore: bool,
+        IsImmuneToZombification by is_zombification_immune: bool,
+        TimeInOverworld by overworld_ticks: i32,
+    };
 }
 
 horse! {
@@ -400,6 +483,62 @@ horse! {
         ChestedHorse by has_chests: bool,
         Items by items: Vec<Slot>,
     };
+
+    Horse {
+        Variant by color: i32
+    }
+}
+
+pub fn horse_color(base: HorseColor, markings: HorseMarkings) -> i32 {
+    base + markings
+}
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone)]
+pub enum HorseColor {
+    White,
+    Creamy,
+    Chestnut,
+    Brown,
+    Black,
+    Gray,
+    DarkBrown
+}
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone)]
+pub enum HorseMarkings {
+    None = 0,
+    White = 256,
+    WhiteField = 512,
+    WhiteDots = 768,
+    BlackDots = 1024
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum FrogColor {
+    Temperate,
+    Warm,
+    Cold
+}
+
+impl Into<NbtTag> for FoxColor {
+    fn into(self) -> NbtTag {
+        NbtTag::String(Identifier::minecraft(format!("{:?}", self).to_lowercase()).to_string())
+    }
+}
+
+
+#[derive(Debug, Copy, Clone)]
+pub enum FoxColor {
+    Red,
+    Snow
+}
+
+impl Into<NbtTag> for FoxColor {
+    fn into(self) -> NbtTag {
+        NbtTag::String(format!("{:?}", self).to_lowercase())
+    }
 }
 
 #[repr(i32)]

@@ -1,3 +1,4 @@
+#[doc(hidden)]
 #[macro_export]
 macro_rules! convert_nbt_type {
     ({
@@ -30,6 +31,7 @@ macro_rules! convert_nbt_type {
     }
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! convert_nbt_key {
     ($name:ident) => {

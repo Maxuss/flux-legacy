@@ -6,7 +6,7 @@ use crate::chat::Component;
 use crate::mc::enchant::Enchantment;
 use crate::mc::entity::AttributeModifier;
 use crate::mc::material::Material;
-use crate::mc::{Identifiable, Identifier};
+use crate::mc::{Identified, Identifier};
 use crate::nbt;
 use crate::nbt::{NbtTag, NbtWriter};
 use crate::snbt::StringNbtWriter;
@@ -19,6 +19,14 @@ pub struct ItemStack {
 }
 
 impl ItemStack {
+    pub fn empty_stack() -> Self {
+        Self {
+            mat: Material::Air,
+            meta: ItemMeta::Default(DefaultMeta::new()),
+            amount: 0
+        }
+    }
+
     pub fn new(mat: Material, amount: Option<i8>) -> Self {
         Self {
             mat,
@@ -29,6 +37,14 @@ impl ItemStack {
 
     pub fn meta(&mut self, meta: ItemMeta) {
         self.meta = meta;
+    }
+
+    pub fn provide_meta<F: FnOnce() -> ItemMeta>(&mut self, generator: F) {
+        self.meta = generator()
+    }
+
+    pub fn modify_meta<F: FnOnce(&mut ItemMeta) -> ItemMeta>(&mut self, modifier: F) {
+        self.meta = modifier(&mut self.meta)
     }
 
     pub fn stringified(&mut self) -> String {
@@ -46,10 +62,32 @@ impl ItemStack {
     }
 }
 
+impl Into<NbtTag> for ItemStack {
+    fn into(self) -> NbtTag {
+        if self.mat == Material::Air {
+            return NbtTag::Compound(nbt!());
+        }
+        let count = self.amount;
+        let tag = self.meta;
+        let id = self.mat.id().to_string();
+        return NbtTag::Compound(nbt! {
+            Count: count,
+            id: id,
+            tag: tag
+        })
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum ItemMeta {
     Default(DefaultMeta),
     Skull(SkullMeta),
+}
+
+impl Into<NbtTag> for ItemMeta {
+    fn into(self) -> NbtTag {
+        self.tag()
+    }
 }
 
 impl MetaContainer for ItemMeta {
@@ -62,12 +100,21 @@ impl MetaContainer for ItemMeta {
             ItemMeta::Skull(m) => m.write_meta(writer),
         }
     }
+
+    fn tag(&self) -> NbtTag {
+        match self {
+            ItemMeta::Default(m) => m.tag(),
+            ItemMeta::Skull(m) => m.tag()
+        }
+    }
 }
 
 pub trait MetaContainer {
     fn write_meta<W>(&mut self, writer: &mut W) -> anyhow::Result<()>
     where
         W: NbtWriter;
+
+    fn tag(&self) -> NbtTag;
 }
 
 #[derive(Default, Debug, Clone)]
@@ -153,6 +200,28 @@ impl Into<NbtTag> for SkullData {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Slot(ItemStack, i32);
+
+impl Into<NbtTag> for Slot {
+    fn into(self) -> NbtTag {
+        let stack = self.0;
+        if stack.mat == Material::Air {
+            return NbtTag::Compound(nbt!());
+        }
+        let count = stack.amount;
+        let tag = stack.meta;
+        let id = stack.mat.id().to_string();
+        let slot = self.1;
+        return NbtTag::Compound(nbt! {
+            Count: count,
+            id: id,
+            tag: tag,
+            Slot: slot
+        });
+    }
+}
+
 macro_rules! meta_impl {
     (
         $(
@@ -222,4 +291,10 @@ pub enum ItemFlag {
     CanDestroy = 0b001000,
     CanPlace = 0b010000,
     Dye = 0b100000
+}
+
+impl Into<NbtTag> for ItemFlag {
+    fn into(self) -> NbtTag {
+        NbtTag::Int(self as i32)
+    }
 }

@@ -29,7 +29,7 @@ impl Identifier {
         S: Into<String>,
     {
         Self {
-            namespace: "minecraft".into(),
+            namespace: "minecraft".to_string(),
             path: path.into(),
         }
     }
@@ -53,6 +53,6 @@ impl Into<NbtTag> for Identifier {
     }
 }
 
-pub trait Identifiable {
+pub trait Identified {
     fn id(&self) -> Identifier;
 }

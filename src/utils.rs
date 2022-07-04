@@ -1,3 +1,5 @@
+use byteorder::{BigEndian, ReadBytesExt};
+use uuid::Uuid;
 use crate::nbt::NbtTag;
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -94,7 +96,8 @@ pub fn escape(src: String) -> String {
     escaped
 }
 
-pub struct Vec3D(f64, f64, f64);
+#[derive(Debug, Copy, Clone)]
+pub struct Vec3D(pub f64, pub f64, pub f64);
 
 impl Into<NbtTag> for Vec3D {
     fn into(self) -> NbtTag {
@@ -102,7 +105,8 @@ impl Into<NbtTag> for Vec3D {
     }
 }
 
-pub struct Vec3F(f32, f32, f32);
+#[derive(Debug, Copy, Clone)]
+pub struct Vec3F(pub f32, pub f32, pub f32);
 
 impl Into<NbtTag> for Vec3F {
     fn into(self) -> NbtTag {
@@ -110,6 +114,7 @@ impl Into<NbtTag> for Vec3F {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct Vec2F(f32, f32);
 
 impl Into<NbtTag> for Vec2F {
@@ -118,6 +123,110 @@ impl Into<NbtTag> for Vec2F {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum Either<F, S> {
+    First(F),
+    Second(S)
+}
+
+impl<F, S> Into<NbtTag> for Either<F, S>
+where F: Into<NbtTag>, S: Into<NbtTag> {
+    fn into(self) -> NbtTag {
+        match self {
+            Either::First(first) => first.into(),
+            Either::Second(second) => second.into()
+        }
+    }
+}
+
+#[cfg(not(feature = "legacy_uuids"))]
+fn uuid_to_int_array(id: Uuid) -> NbtTag {
+    let bytes = id.as_bytes().to_vec();
+    let first = bytes[0..3].as_ref().read_i32::<BigEndian>().unwrap();
+    let second = bytes[4..7].as_ref().read_i32::<BigEndian>().unwrap();
+    let third = bytes[8..11].as_ref().read_i32::<BigEndian>().unwrap();
+    let fourth = bytes[12..15].as_ref().read_i32::<BigEndian>().unwrap();
+    NbtTag::IntArray(vec![first, second, third, fourth])
+}
+
+impl Into<NbtTag> for Uuid {
+    fn into(self) -> NbtTag {
+        #[cfg(feature = "legacy_uuids")]
+        return NbtTag::String(self.to_string());
+        #[cfg(not(feature = "legacy_uuids"))]
+        return uuid_to_int_array(self)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Positive<I> {
+    value: I
+}
+
+impl<I> Into<NbtTag> for Positive<I> where I: Into<NbtTag> {
+    fn into(self) -> NbtTag {
+        self.value.into()
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Vec3I(pub i32, pub i32, pub i32);
+
+impl Into<NbtTag> for Vec3I {
+    fn into(self) -> NbtTag {
+        NbtTag::IntArray(vec![self.0, self.1, self.2])
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+#[repr(u8)]
+pub enum GeneralColor {
+    White,
+    Orange,
+    Magenta,
+    LightBlue,
+    Yellow,
+    Lime,
+    Pink,
+    Gray,
+    LightGray,
+    Cyan,
+    Purple,
+    Blue,
+    Brown,
+    Green,
+    Red,
+    Black
+}
+
+impl Into<NbtTag> for GeneralColor {
+    fn into(self) -> NbtTag {
+        NbtTag::Byte(self as i8)
+    }
+}
+
+macro_rules! __positive_impl {
+    ($($int:ident),* $(,)*) => {
+        $(
+        impl Positive<$int> {
+            pub fn new(i: $int) -> Self {
+                assert!(i >= 0, "Only positive numbers are accepted!");
+                Self {
+                    value: i
+                }
+            }
+        }
+
+        impl Into<Positive<$int>> for $int {
+            fn into(self) -> Positive<$int> {
+                Positive::new(self)
+            }
+        }
+        )*
+    };
+}
+
+__positive_impl!(i32);
 
 #[doc(hidden)]
 #[macro_export]
@@ -158,6 +267,12 @@ macro_rules! __meta_struct {
 
             impl MetaContainer for $name {
                 fn write_meta<W>(&mut self, writer: &mut W) -> anyhow::Result<()> where W: NbtWriter {
+                    let comp = self.tag();
+                    writer.write_tag(None, comp)?;
+                    Ok(())
+                }
+
+                fn tag(&self) -> $crate::nbt::NbtTag {
                     $(
                     let $field_name: NbtTag = Clone::clone(&self.$field_name).into();
                     )*
@@ -166,8 +281,13 @@ macro_rules! __meta_struct {
                         $stored_name: $field_name,
                         )*
                     });
-                    writer.write_tag(None, comp)?;
-                    return Ok(());
+                    comp
+                }
+            }
+
+            impl Into<$crate::nbt::NbtTag> for $name {
+                fn into(self) -> $crate::nbt::NbtTag {
+                    self.tag()
                 }
             }
         )*

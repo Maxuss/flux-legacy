@@ -32,3 +32,7 @@ features = [ "fs", "rt-multi-thread", "io-util", "macros" ]
 [dependencies.serde]
 version = "1.0.136"
 features = [ "derive" ]
+
+[features]
+default = []
+legacy_uuids = []

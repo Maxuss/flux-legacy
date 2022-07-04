@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use std::io::Write;
 
 use anyhow::bail;
-use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
-use uuid::Uuid;
+use byteorder::{BigEndian, WriteBytesExt};
 
 macro_rules! bare_fn {
     ($(
@@ -122,6 +121,13 @@ where
     }
 }
 
+impl<B> From<Box<B>> for NbtTag
+where B: Into<NbtTag> {
+    fn from(b: Box<B>) -> Self {
+        (*b).into()
+    }
+}
+
 impl IntoTag for Compound {
     fn nbt(self) -> NbtTag {
         NbtTag::Compound(self)
@@ -140,6 +146,13 @@ where
         }
     }
 }
+
+// impl<T> Into<NbtTag> for Vec<T>
+// where T: Into<NbtTag> {
+//     fn into(self) -> NbtTag {
+//         NbtTag::List(self.iter().map(T::nbt).collect())
+//     }
+// }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum NbtTag {
@@ -178,14 +191,9 @@ impl Into<NbtTag> for bool {
     }
 }
 
-impl Into<NbtTag> for Uuid {
+impl Into<NbtTag> for u8 {
     fn into(self) -> NbtTag {
-        let bytes = self.as_bytes().to_vec();
-        let first = bytes[0..3].as_ref().read_i32::<BigEndian>().unwrap();
-        let second = bytes[4..7].as_ref().read_i32::<BigEndian>().unwrap();
-        let third = bytes[8..11].as_ref().read_i32::<BigEndian>().unwrap();
-        let fourth = bytes[12..15].as_ref().read_i32::<BigEndian>().unwrap();
-        NbtTag::IntArray(vec![first, second, third, fourth])
+        NbtTag::Byte(self as i8)
     }
 }
 
@@ -239,10 +247,10 @@ impl Into<NbtTag> for &str {
 
 impl<N> Into<NbtTag> for Vec<N>
 where
-    N: Into<NbtTag>,
+    N: IntoTag,
 {
     fn into(self) -> NbtTag {
-        NbtTag::List(self.into_iter().map(|e| e.into()).collect::<Vec<NbtTag>>())
+        NbtTag::List(self.into_iter().map(|e| e.nbt()).collect())
     }
 }
 

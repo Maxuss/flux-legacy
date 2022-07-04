@@ -1,4 +1,5 @@
 pub mod meta;
+pub mod effect;
 
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -100,9 +101,9 @@ impl Into<NbtTag> for AttributeModifier {
         let amount = self.amount;
         let oper = self.operation;
         NbtTag::Compound(nbt! {
-            attribute: attr,
-            amount: amount,
-            operation: oper
+            AttributeName: attr,
+            Amount: amount,
+            Operation: oper
         })
     }
 }

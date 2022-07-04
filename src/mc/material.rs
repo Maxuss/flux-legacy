@@ -1,6 +1,6 @@
 use convert_case::{Case, Casing};
 
-use crate::mc::{Identifiable, Identifier};
+use crate::mc::{Identified, Identifier};
 use crate::nbt::NbtTag;
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -1247,7 +1247,7 @@ impl ToString for Material {
     }
 }
 
-impl Identifiable for Material {
+impl Identified for Material {
     fn id(&self) -> Identifier {
         let str = self.to_string();
         Identifier::minecraft(str.to_case(Case::Snake))

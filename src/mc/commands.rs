@@ -1,4 +1,4 @@
-use crate::mc::Identifiable;
+use crate::mc::Identified;
 use crate::prelude::{ItemStack, Material};
 
 pub trait CommandLike {

@@ -1,6 +1,6 @@
 use convert_case::{Case, Casing};
 
-use crate::mc::{Identifiable, Identifier};
+use crate::mc::{Identified, Identifier};
 use crate::nbt;
 use crate::nbt::NbtTag;
 
@@ -58,7 +58,7 @@ impl ToString for Enchant {
     }
 }
 
-impl Identifiable for Enchant {
+impl Identified for Enchant {
     fn id(&self) -> Identifier {
         let str = self.to_string();
         Identifier::minecraft(str.to_case(Case::Snake))
@@ -80,7 +80,7 @@ impl Enchantment {
     }
 }
 
-impl Identifiable for Enchantment {
+impl Identified for Enchantment {
     fn id(&self) -> Identifier {
         self.typ.id()
     }

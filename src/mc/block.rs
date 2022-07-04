@@ -1,6 +1,7 @@
 use std::str::FromStr;
+use crate::nbt;
 use crate::nbt::NbtTag;
-use crate::utils::Vec3D;
+use crate::utils::{Vec3D, Vec3I};
 
 macro_rules! num_coord {
     ($($num:ident),+) => {
@@ -55,6 +56,17 @@ impl Into<Vec3D> for Location {
         Vec3D(self.x.pos as f64, self.y.pos as f64, self.z.pos as f64)
     }
 }
+
+impl Into<Vec3I> for Location {
+    fn into(self) -> Vec3I {
+        assert!(!self.x.local && self.x.relative, "Can not convert location into a 3-Integer Vector if it has local/relative coordinates!");
+        assert!(!self.y.local && self.y.relative, "Can not convert location into a 3-Integer Vector if it has local/relative coordinates!");
+        assert!(!self.z.local && self.z.relative, "Can not convert location into a 3-Integer Vector if it has local/relative coordinates!");
+
+        Vec3I(self.x.pos, self.y.pos, self.z.pos)
+    }
+}
+
 
 impl Location {
     pub fn new<C>(x: C, y: C, z: C) -> Self
@@ -185,5 +197,22 @@ impl FromStr for Coordinate {
                 local,
             })
         }
+    }
+}
+
+impl Into<NbtTag> for Location {
+    fn into(self) -> NbtTag {
+        assert!(!self.x.local && self.x.relative, "Can not convert location into a Location Compound if it has local/relative coordinates!");
+        assert!(!self.y.local && self.y.relative, "Can not convert location into a Location Compound if it has local/relative coordinates!");
+        assert!(!self.z.local && self.z.relative, "Can not convert location into a Location Compound if it has local/relative coordinates!");
+
+        let x = self.x.pos;
+        let y = self.y.pos;
+        let z = self.z.pos;
+        NbtTag::Compound(nbt! {
+            X: x,
+            Y: y,
+            Z: z
+        })
     }
 }

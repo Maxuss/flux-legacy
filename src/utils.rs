@@ -142,10 +142,10 @@ where F: Into<NbtTag>, S: Into<NbtTag> {
 #[cfg(not(feature = "legacy_uuids"))]
 fn uuid_to_int_array(id: Uuid) -> NbtTag {
     let bytes = id.as_bytes().to_vec();
-    let first = bytes[0..3].as_ref().read_i32::<BigEndian>().unwrap();
-    let second = bytes[4..7].as_ref().read_i32::<BigEndian>().unwrap();
-    let third = bytes[8..11].as_ref().read_i32::<BigEndian>().unwrap();
-    let fourth = bytes[12..15].as_ref().read_i32::<BigEndian>().unwrap();
+    let first = bytes[0..4].as_ref().read_i32::<BigEndian>().unwrap();
+    let second = bytes[4..8].as_ref().read_i32::<BigEndian>().unwrap();
+    let third = bytes[8..12].as_ref().read_i32::<BigEndian>().unwrap();
+    let fourth = bytes[12..16].as_ref().read_i32::<BigEndian>().unwrap();
     NbtTag::IntArray(vec![first, second, third, fourth])
 }
 

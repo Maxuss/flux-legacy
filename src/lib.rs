@@ -11,14 +11,16 @@ pub mod utils;
 
 #[cfg(test)]
 mod tests {
+    use std::time::Instant;
     use crate::chat::{Component, NamedColor};
     use crate::component;
-    use crate::mc::commands::GiveCommand;
+    use crate::mc::commands::{GiveCommand, SummonCommand};
     use crate::mc::enchant::{Enchant, Enchantment};
     use crate::mc::entity::{Attribute, AttributeModifier, AttributeOperation, FullSelector, IntoSelector, Selector};
-    use crate::mc::item::{DefaultMeta, FLAG_HIDE_ATTRIBUTES, FLAG_HIDE_DESTROY, FLAG_HIDE_DYED, FLAG_HIDE_ENCHANTMENTS, FLAG_HIDE_PLACE, FLAG_HIDE_UNBREAKABLE};
+    use crate::mc::entity::meta::{ArmorStand, Equipment, HandItems, StandPose};
+    use crate::mc::item::{DefaultMeta, FLAG_HIDE_ATTRIBUTES, FLAG_HIDE_DESTROY, FLAG_HIDE_DYED, FLAG_HIDE_ENCHANTMENTS, FLAG_HIDE_PLACE, FLAG_HIDE_UNBREAKABLE, SkullData, SkullMeta, SkullOwner};
     use crate::prelude::*;
-    use crate::utils::Keybind;
+    use crate::utils::{Keybind, Vec3F};
 
     #[test]
     fn test_items() {
@@ -85,6 +87,30 @@ mod tests {
     fn component_macros() {
         let comp = component! { @0xff0000 bold italic "Red, Bold, and Italic " & !bold "just red and italic" };
         println!("{}", comp.to_string())
+    }
+
+    #[test]
+    fn test_summon_command() {
+        let meta = ArmorStand::new()
+            .equipment(Equipment::new(
+                None,
+                None,
+                Some(Material::NetheriteChestplate.stack()),
+                Some(Material::PlayerHead.stack().provide_meta(|| ItemMeta::Skull(
+                    SkullMeta::new().skull_owner(SkullOwner::Base64(SkullData::new("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTVlYjBiZDg1YWFkZGYwZDI5ZWQwODJlYWMwM2ZjYWRlNDNkMGVlODAzYjBlODE2MmFkZDI4YTYzNzlmYjU0ZSJ9fX0="))
+                    ))))
+            ))
+            .hand_items(HandItems::new(
+                Some(Material::NetheriteSword.stack()),
+                None
+            ))
+            .pose(StandPose::new().right_arm(Vec3F(287.0, 0.0, 0.0)))
+            .show_arms(true);
+        let time = Instant::now();
+        let mut cmd = SummonCommand::new(EntityType::ArmorStand, Some("~ ~ ~".into()), Some(EntityMeta::ArmorStand(meta)));
+        let diff = (Instant::now() - time).as_micros();
+        println!("Took {}mcs", diff);
+        println!("{}", cmd.compile())
     }
 }
 

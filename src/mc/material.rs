@@ -2,6 +2,7 @@ use convert_case::{Case, Casing};
 
 use crate::mc::{Identified, Identifier};
 use crate::nbt::NbtTag;
+use crate::prelude::ItemStack;
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Material {
@@ -1233,6 +1234,12 @@ pub enum Material {
     GlowBerries,
     Honeycomb,
     HoneyBottle,
+}
+
+impl Material {
+    pub fn stack(&self) -> ItemStack {
+        ItemStack::new(*self, None)
+    }
 }
 
 impl Into<NbtTag> for Material {

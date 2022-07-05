@@ -47,6 +47,18 @@ pub struct Location {
     z: Coordinate,
 }
 
+impl Into<Location> for &'static str {
+    fn into(self) -> Location {
+        Location::from_str(self).unwrap()
+    }
+}
+
+impl Into<Location> for String {
+    fn into(self) -> Location {
+        Location::from_str(&self).unwrap()
+    }
+}
+
 impl Into<Vec3D> for Location {
     fn into(self) -> Vec3D {
         assert!(!self.x.local && self.x.relative, "Can not convert location into a 3-Double Vector if it has local/relative coordinates!");

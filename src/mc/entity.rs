@@ -1,11 +1,13 @@
 pub mod meta;
 pub mod effect;
+pub mod types;
 
 use std::collections::HashMap;
 use std::hash::Hash;
 
 use crate::nbt;
 use crate::nbt::NbtTag;
+use crate::prelude::{EntityMeta, EntityType};
 
 pub trait IntoSelector: Clone {
     fn selector(&self) -> String;
@@ -172,5 +174,29 @@ impl ToString for Attribute {
 impl Into<NbtTag> for Attribute {
     fn into(self) -> NbtTag {
         NbtTag::String(self.to_string())
+    }
+}
+
+#[allow(unused)]
+#[derive(Debug, Clone)]
+pub struct Entity {
+    ty: EntityType,
+    meta: EntityMeta
+}
+
+impl Entity {
+    pub fn new(ty: EntityType) -> Self {
+        Self {
+            ty,
+            meta: EntityMeta::new(ty)
+        }
+    }
+
+    pub fn provide_meta<F: FnOnce() -> EntityMeta>(&mut self, generator: F) {
+        self.meta = generator()
+    }
+
+    pub fn modify_meta<F: FnOnce(&mut EntityMeta) -> EntityMeta>(&mut self, modifier: F) {
+        self.meta = modifier(&mut self.meta)
     }
 }

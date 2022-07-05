@@ -1,5 +1,5 @@
 use crate::mc::Identified;
-use crate::prelude::{ItemStack, Material};
+use crate::prelude::*;
 
 pub trait CommandLike {
     fn compile(&mut self) -> String
@@ -22,6 +22,18 @@ impl CommandLike for Material {
         Self: Sized,
     {
         self.id().to_string()
+    }
+}
+
+impl CommandLike for EntityType {
+    fn compile(&mut self) -> String where Self: Sized {
+        self.id().to_string()
+    }
+}
+
+impl CommandLike for Location {
+    fn compile(&mut self) -> String where Self: Sized {
+        self.to_string()
     }
 }
 
@@ -61,8 +73,8 @@ macro_rules! declare_commands {
                     buf.push_str($command_name);
                     $(
                         $(
-                            if let Some(s) = self.$opt_name {
-                                if let Some(mut d) = s {
+                            if let Some(s) = self.$opt_name.as_ref() {
+                                if let Some(mut d) = s.clone() {
                                     buf.push_str(format!(" {}", d.compile()).as_str());
                                 };
                             };
@@ -120,4 +132,10 @@ declare_commands! {
         req T selector,
         req ItemStack item
     );
+
+    command "summon" SummonCommand(
+        req EntityType entity,
+        opt Location pos,
+        opt EntityMeta nbt
+    )
 }

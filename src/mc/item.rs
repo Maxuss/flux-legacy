@@ -39,12 +39,14 @@ impl ItemStack {
         self.meta = meta;
     }
 
-    pub fn provide_meta<F: FnOnce() -> ItemMeta>(&mut self, generator: F) {
-        self.meta = generator()
+    pub fn provide_meta<F: FnOnce() -> ItemMeta>(&mut self, generator: F) -> ItemStack {
+        self.meta = generator();
+        self.clone()
     }
 
-    pub fn modify_meta<F: FnOnce(&mut ItemMeta) -> ItemMeta>(&mut self, modifier: F) {
-        self.meta = modifier(&mut self.meta)
+    pub fn modify_meta<F: FnOnce(&mut ItemMeta) -> ItemMeta>(&mut self, modifier: F) -> ItemStack {
+        self.meta = modifier(&mut self.meta);
+        self.clone()
     }
 
     pub fn stringified(&mut self) -> String {
@@ -173,11 +175,11 @@ pub struct SkullData {
 }
 
 impl SkullData {
-    pub fn new(texture: String) -> Self {
+    pub fn new<S: Into<String>>(texture: S) -> Self {
         let id = Uuid::new_v4();
         let rand_bytes: [u8; 32] = rand::random();
         let name = base64::encode(rand_bytes);
-        Self { id, name, texture }
+        Self { id, name, texture: texture.into() }
     }
 }
 

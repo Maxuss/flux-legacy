@@ -3,5 +3,7 @@ pub use crate::mc::{
     item::{ItemDisplay, ItemMeta, ItemStack},
     material::Material,
     Identified, Identifier,
+    entity::{meta::EntityMeta,types::EntityType},
+    block::*
 };
 pub use crate::nbt;

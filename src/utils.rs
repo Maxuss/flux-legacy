@@ -1,4 +1,8 @@
+use std::io::{Stdout, Write};
+use std::sync::{Arc, Mutex};
 use byteorder::{BigEndian, ReadBytesExt};
+use colored::{Color, Colorize};
+use lazy_static::lazy_static;
 use uuid::Uuid;
 use crate::nbt::NbtTag;
 
@@ -292,4 +296,44 @@ macro_rules! __meta_struct {
             }
         )*
     }
+}
+
+pub struct Logger<W> {
+    write: W
+}
+
+impl<W> Logger<W> where W: Write {
+    pub fn new(write: W) -> Self {
+        Self {
+            write
+        }
+    }
+
+    pub fn info<S: Into<String>>(&mut self, info: S) {
+        self.write.write_all(format!("{}: {}\n", "[INFO] ".color(Color::TrueColor { r: 122, g: 122, b: 122 }), info.into()).as_bytes()).expect("Could not log information!");
+    }
+
+    pub fn warn<S: Into<String>>(&mut self, warn: S) {
+        self.write.write_all(format!("{}: {}\n", "[WARN] ".color(Color::BrightYellow), warn.into()).as_bytes()).expect("Could not log warning!");
+    }
+
+    pub fn error<S: Into<String>>(&mut self, err: S) {
+        self.write.write_all(format!("{}: {}\n", "[WARN] ".color(Color::BrightRed), err.into()).as_bytes()).expect("Could not log error!");
+    }
+}
+
+lazy_static! {
+    pub static ref STDOUT_LOGGER: Arc<Mutex<Logger<Stdout>>> = Arc::new(Mutex::new(Logger::new(std::io::stdout())));
+}
+
+pub fn log_info<S: Into<String>>(msg: S) {
+    STDOUT_LOGGER.lock().expect("Could not access logger!").info(msg);
+}
+
+pub fn log_warn<S: Into<String>>(msg: S) {
+    STDOUT_LOGGER.lock().expect("Could not access logger!").warn(msg);
+}
+
+pub fn log_error<S: Into<String>>(msg: S) {
+    STDOUT_LOGGER.lock().expect("Could not access logger!").error(msg);
 }

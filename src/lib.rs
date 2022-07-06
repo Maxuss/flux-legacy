@@ -1,5 +1,7 @@
 extern crate core;
 
+use crate::modules::Module;
+
 pub mod chat;
 pub mod macros;
 pub mod mc;
@@ -11,14 +13,16 @@ pub mod utils;
 
 #[cfg(test)]
 mod tests {
+    use std::path::{Path, PathBuf};
     use std::time::Instant;
     use crate::chat::{Component, NamedColor};
-    use crate::component;
+    use crate::{component, ExampleModule};
     use crate::mc::commands::{GiveCommand, SummonCommand};
     use crate::mc::enchant::{Enchant, Enchantment};
     use crate::mc::entity::{Attribute, AttributeModifier, AttributeOperation, FullSelector, IntoSelector, Selector};
     use crate::mc::entity::meta::{ArmorStand, Equipment, HandItems, StandPose};
     use crate::mc::item::{DefaultMeta, FLAG_HIDE_ATTRIBUTES, FLAG_HIDE_DESTROY, FLAG_HIDE_DYED, FLAG_HIDE_ENCHANTMENTS, FLAG_HIDE_PLACE, FLAG_HIDE_UNBREAKABLE, SkullData, SkullMeta, SkullOwner};
+    use crate::modules::{GLOBAL_MODULE_LOADER, GlobalFluxConfiguration, Module, ModuleLoader};
     use crate::prelude::*;
     use crate::utils::{Keybind, Vec3F};
 
@@ -112,16 +116,29 @@ mod tests {
         println!("Took {}mcs", diff);
         println!("{}", cmd.compile())
     }
+
+    #[test]
+    fn test_load_library() -> anyhow::Result<()> {
+        let loader = &mut GLOBAL_MODULE_LOADER.lock().unwrap();
+        loader.load(ExampleModule { id: "example".into() })?;
+        Ok(())
+    }
 }
 
-#[macro_export]
-macro_rules! declare_module {
-    ($typ:ident,$ctor:path) => {
-        extern "C" fn _plugin_ctor() -> *mut $crate::modules::Module {
-            let ctor: fn() -> $typ = $ctor;
-            let inst = ctor();
-            let boxed = Box::new(inst);
-            Box::into_raw(boxed)
-        }
-    };
+struct ExampleModule {
+    id: String
+}
+
+impl Module for ExampleModule {
+    fn name(&self) -> String {
+        "Example Module".into()
+    }
+
+    fn load(&mut self) {
+        println!("Example Module loaded!")
+    }
+
+    fn init(&mut self) {
+        println!("Example Module initialized!")
+    }
 }

@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use crate::nbt::NbtTag;
 
 pub mod block;
@@ -6,6 +7,9 @@ pub mod enchant;
 pub mod entity;
 pub mod item;
 pub mod material;
+pub mod context;
+pub mod world;
+pub mod data;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct Identifier {
@@ -41,12 +45,6 @@ impl Into<String> for Identifier {
     }
 }
 
-impl ToString for Identifier {
-    fn to_string(&self) -> String {
-        self.namespace.clone() + ":" + self.path.as_str()
-    }
-}
-
 impl Into<NbtTag> for Identifier {
     fn into(self) -> NbtTag {
         NbtTag::String(self.to_string())
@@ -55,4 +53,10 @@ impl Into<NbtTag> for Identifier {
 
 pub trait Identified {
     fn id(&self) -> Identifier;
+}
+
+impl Display for Identifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}:{}", self.namespace, self.path))
+    }
 }

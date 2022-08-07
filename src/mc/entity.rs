@@ -1,13 +1,16 @@
 pub mod meta;
 pub mod effect;
 pub mod types;
+pub mod model;
 
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::io::Write;
+use crate::mc::world::WorldAccess;
 
 use crate::nbt;
 use crate::nbt::NbtTag;
-use crate::prelude::{EntityMeta, EntityType};
+use crate::prelude::{EntityMeta, EntityType, Identified};
 
 pub trait IntoSelector: Clone {
     fn selector(&self) -> String;
@@ -181,15 +184,21 @@ impl Into<NbtTag> for Attribute {
 #[derive(Debug, Clone)]
 pub struct Entity {
     ty: EntityType,
-    meta: EntityMeta
+    pub(crate) meta: EntityMeta,
+    pub(crate) id: u64
 }
 
 impl Entity {
     pub fn new(ty: EntityType) -> Self {
         Self {
             ty,
-            meta: EntityMeta::new(ty)
+            meta: EntityMeta::new(ty),
+            id: rand::random()
         }
+    }
+
+    pub fn get_type(&self) -> EntityType {
+        self.ty
     }
 
     pub fn provide_meta<F: FnOnce() -> EntityMeta>(&mut self, generator: F) {
@@ -198,5 +207,10 @@ impl Entity {
 
     pub fn modify_meta<F: FnOnce(&mut EntityMeta) -> EntityMeta>(&mut self, modifier: F) {
         self.meta = modifier(&mut self.meta)
+    }
+
+    pub fn save<W: Write>(&mut self, world: &mut WorldAccess<W>) {
+        let sel = format!("@e[tag=fluxd{}]", self.id);
+        world.write_line(format!("execute if entity {} as {} run data merge entity @s {}", sel, sel, self.meta.stringified()))
     }
 }

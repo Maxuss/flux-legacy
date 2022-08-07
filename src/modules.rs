@@ -14,8 +14,6 @@ use anyhow::bail;
 use colored::{Color, Colorize};
 
 use serde::{Deserialize, Serialize};
-use tokio::fs::File;
-use tokio::io::AsyncReadExt;
 use crate::utils::log_warn;
 
 lazy_static! {

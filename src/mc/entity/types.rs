@@ -6,6 +6,7 @@ use crate::prelude::EntityMeta;
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum EntityType {
+    Dynamic,
     Allay,
     Frog,
     Tadpole,

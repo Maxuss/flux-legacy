@@ -13,16 +13,23 @@ pub mod utils;
 
 #[cfg(test)]
 mod tests {
+    use std::fs::File;
+    use std::io::stdout;
     use std::path::{Path, PathBuf};
+    use std::str::FromStr;
+    use std::sync::{Arc, Mutex};
     use std::time::Instant;
-    use crate::chat::{Component, NamedColor};
-    use crate::{component, ExampleModule};
+    use lobsterchat::lobster;
+    use crate::chat::component::{Component, NamedColor};
+    use crate::{chat::component::*, ExampleModule};
     use crate::mc::commands::{GiveCommand, SummonCommand};
     use crate::mc::enchant::{Enchant, Enchantment};
-    use crate::mc::entity::{Attribute, AttributeModifier, AttributeOperation, FullSelector, IntoSelector, Selector};
-    use crate::mc::entity::meta::{ArmorStand, Equipment, HandItems, StandPose};
+    use crate::mc::entity::{Attribute, AttributeModifier, AttributeOperation, Entity, FullSelector, IntoSelector, Selector};
+    use crate::mc::entity::meta::{ArmorStand, EntityRotation, Equipment, GeneralZombie, HandItems, StandPose};
     use crate::mc::item::{DefaultMeta, FLAG_HIDE_ATTRIBUTES, FLAG_HIDE_DESTROY, FLAG_HIDE_DYED, FLAG_HIDE_ENCHANTMENTS, FLAG_HIDE_PLACE, FLAG_HIDE_UNBREAKABLE, SkullData, SkullMeta, SkullOwner};
+    use crate::mc::world::WorldAccess;
     use crate::modules::{GLOBAL_MODULE_LOADER, GlobalFluxConfiguration, Module, ModuleLoader};
+    use crate::modules::functions::FunctionWriter;
     use crate::prelude::*;
     use crate::utils::{Keybind, Vec3F};
 
@@ -88,12 +95,6 @@ mod tests {
     }
 
     #[test]
-    fn component_macros() {
-        let comp = component! { @0xff0000 bold italic "Red, Bold, and Italic " & !bold "just red and italic" };
-        println!("{}", comp.to_string())
-    }
-
-    #[test]
     fn test_summon_command() {
         let meta = ArmorStand::new()
             .equipment(Equipment::new(
@@ -121,6 +122,34 @@ mod tests {
     fn test_load_library() -> anyhow::Result<()> {
         let loader = &mut GLOBAL_MODULE_LOADER.lock().unwrap();
         loader.load(ExampleModule { id: "example".into() })?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_entity() -> anyhow::Result<()> {
+        let mut world = WorldAccess::new(Arc::new(Mutex::new(FunctionWriter::new(File::create("test.mcfunction").unwrap()))));
+        let mut entity = Entity::new(EntityType::Zombie);
+        entity.provide_meta(|| {
+            EntityMeta::GeneralZombie(
+                GeneralZombie::new()
+                    .hand_items(HandItems::new(Some(ItemStack::new(Material::DiamondSword, None)), None))
+                    .custom_name(lobster("<gold><bold>My Epic Zombie"))
+                    .custom_name_visible(true)
+                    .no_ai(true)
+                    .rotation(EntityRotation::new(120.0, 120.0))
+                    .invulnerable(true)
+            )
+        });
+        world.summon_entity(Location::from_str("~ ~ ~").unwrap(), entity.clone());
+        entity.modify_meta(|meta| {
+            if let EntityMeta::GeneralZombie(zombie) = meta {
+                return EntityMeta::GeneralZombie(
+                    zombie.custom_name(lobster("<aqua><italic>Different Zombie"))
+                );
+            }
+            unreachable!()
+        });
+        entity.save(&mut world);
         Ok(())
     }
 }

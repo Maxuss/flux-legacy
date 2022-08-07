@@ -1,0 +1,3 @@
+[submodule "lobster"]
+	path = lobster
+	url = https://github.com/maxuss/lobster

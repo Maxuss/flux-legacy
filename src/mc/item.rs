@@ -2,7 +2,7 @@
 
 use uuid::Uuid;
 
-use crate::chat::Component;
+use crate::chat::component::Component;
 use crate::mc::enchant::Enchantment;
 use crate::mc::entity::AttributeModifier;
 use crate::mc::material::Material;

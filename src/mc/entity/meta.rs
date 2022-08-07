@@ -1,5 +1,4 @@
 use convert_case::{Case, Casing};
-use crate::chat::Component;
 use crate::utils::{Either, Positive, Vec3D, Vec3I};
 use crate::mc::block::Location;
 use crate::nbt::NbtTag;
@@ -17,6 +16,7 @@ use crate::mc::entity::types::EntityType;
 use crate::mc::entity::effect::Effect;
 use crate::snbt::StringNbtWriter;
 use crate::utils::Vec3F;
+use crate::chat::component::Component;
 
 #[derive(Debug, Copy, Clone)]
 pub struct EntityRotation {
@@ -574,7 +574,7 @@ meta_enum! {
     Drowned | Zombie | Husk = GeneralZombie,
     MagmaCube | Slime = GeneralSlime,
     ZombieHorse = GeneralHorse,
-    FishingBobber | LeashKnot | LightningBolt = GeneralEntity,
+    FishingBobber | LeashKnot | LightningBolt | Dynamic = GeneralEntity,
     GlowItemFrame | ItemFrame = ItemFrame,
 }
 

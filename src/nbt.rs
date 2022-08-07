@@ -4,6 +4,7 @@ use std::io::Write;
 
 use anyhow::bail;
 use byteorder::{BigEndian, WriteBytesExt};
+use crate::snbt::StringNbtWriter;
 
 macro_rules! bare_fn {
     ($(
@@ -72,7 +73,7 @@ fn write_string(str: String, write: &mut impl Write) -> anyhow::Result<()> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Compound {
-    tags: HashMap<String, NbtTag>,
+    pub(crate) tags: HashMap<String, NbtTag>,
 }
 
 impl Compound {
@@ -182,6 +183,17 @@ where
             .map(|(k, v)| (k.into(), v.into()))
             .collect::<HashMap<String, NbtTag>>();
         NbtTag::Compound(Compound::new(map))
+    }
+}
+
+impl NbtTag {
+    pub fn stringify(self) -> String {
+        let mut buf = vec![];
+
+        let mut writer = StringNbtWriter::new(&mut buf);
+        writer.write_tag(None, self).expect("Could not stringify nbt tag");
+
+        String::from_utf8(buf).expect("Could not assemble string from ut8 bytes")
     }
 }
 

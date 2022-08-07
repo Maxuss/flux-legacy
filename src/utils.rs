@@ -44,6 +44,12 @@ pub enum Keybind {
     ChangePerspective,
 }
 
+impl Into<String> for Keybind {
+    fn into(self) -> String {
+        self.key()
+    }
+}
+
 impl Keybind {
     pub fn key(&self) -> String {
         String::from(match *self {

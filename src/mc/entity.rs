@@ -1,12 +1,12 @@
-pub mod meta;
 pub mod effect;
-pub mod types;
+pub mod meta;
 pub mod model;
+pub mod types;
 
+use crate::mc::world::WorldAccess;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::io::Write;
-use crate::mc::world::WorldAccess;
 
 use crate::nbt;
 use crate::nbt::NbtTag;
@@ -185,7 +185,7 @@ impl Into<NbtTag> for Attribute {
 pub struct Entity {
     ty: EntityType,
     pub(crate) meta: EntityMeta,
-    pub(crate) id: u64
+    pub(crate) id: u64,
 }
 
 impl Entity {
@@ -193,7 +193,7 @@ impl Entity {
         Self {
             ty,
             meta: EntityMeta::new(ty),
-            id: rand::random()
+            id: rand::random(),
         }
     }
 
@@ -211,6 +211,11 @@ impl Entity {
 
     pub fn save<W: Write>(&mut self, world: &mut WorldAccess<W>) {
         let sel = format!("@e[tag=fluxd{}]", self.id);
-        world.write_line(format!("execute if entity {} as {} run data merge entity @s {}", sel, sel, self.meta.stringified()))
+        world.write_line(format!(
+            "execute if entity {} as {} run data merge entity @s {}",
+            sel,
+            sel,
+            self.meta.stringified()
+        ))
     }
 }

@@ -1,15 +1,15 @@
-use std::fmt::{Display, Formatter};
 use crate::nbt::NbtTag;
+use std::fmt::{Display, Formatter};
 
 pub mod block;
 pub mod commands;
+pub mod context;
+pub mod data;
 pub mod enchant;
 pub mod entity;
 pub mod item;
 pub mod material;
-pub mod context;
 pub mod world;
-pub mod data;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct Identifier {

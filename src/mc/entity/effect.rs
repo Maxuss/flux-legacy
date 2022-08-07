@@ -1,6 +1,6 @@
 use crate::__meta_struct;
-use crate::nbt::{NbtTag, NbtWriter};
 use crate::mc::item::MetaContainer;
+use crate::nbt::{NbtTag, NbtWriter};
 
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -37,7 +37,7 @@ pub enum Effect {
     DolphinsGrace,
     BadOmen,
     HeroOfTheVillage,
-    Darkness
+    Darkness,
 }
 
 impl Into<NbtTag> for Effect {

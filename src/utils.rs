@@ -1,10 +1,10 @@
-use std::io::{Stdout, Write};
-use std::sync::{Arc, Mutex};
+use crate::nbt::NbtTag;
 use byteorder::{BigEndian, ReadBytesExt};
 use colored::{Color, Colorize};
 use lazy_static::lazy_static;
+use std::io::{Stdout, Write};
+use std::sync::{Arc, Mutex};
 use uuid::Uuid;
-use crate::nbt::NbtTag;
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Keybind {
@@ -111,7 +111,11 @@ pub struct Vec3D(pub f64, pub f64, pub f64);
 
 impl Into<NbtTag> for Vec3D {
     fn into(self) -> NbtTag {
-        NbtTag::List(vec![NbtTag::Double(self.0), NbtTag::Double(self.1), NbtTag::Double(self.2)])
+        NbtTag::List(vec![
+            NbtTag::Double(self.0),
+            NbtTag::Double(self.1),
+            NbtTag::Double(self.2),
+        ])
     }
 }
 
@@ -120,7 +124,11 @@ pub struct Vec3F(pub f32, pub f32, pub f32);
 
 impl Into<NbtTag> for Vec3F {
     fn into(self) -> NbtTag {
-        NbtTag::List(vec![NbtTag::Float(self.0), NbtTag::Float(self.1), NbtTag::Float(self.2)])
+        NbtTag::List(vec![
+            NbtTag::Float(self.0),
+            NbtTag::Float(self.1),
+            NbtTag::Float(self.2),
+        ])
     }
 }
 
@@ -136,15 +144,18 @@ impl Into<NbtTag> for Vec2F {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub enum Either<F, S> {
     First(F),
-    Second(S)
+    Second(S),
 }
 
 impl<F, S> Into<NbtTag> for Either<F, S>
-where F: Into<NbtTag>, S: Into<NbtTag> {
+where
+    F: Into<NbtTag>,
+    S: Into<NbtTag>,
+{
     fn into(self) -> NbtTag {
         match self {
             Either::First(first) => first.into(),
-            Either::Second(second) => second.into()
+            Either::Second(second) => second.into(),
         }
     }
 }
@@ -164,16 +175,19 @@ impl Into<NbtTag> for Uuid {
         #[cfg(feature = "legacy_uuids")]
         return NbtTag::String(self.to_string());
         #[cfg(not(feature = "legacy_uuids"))]
-        return uuid_to_int_array(self)
+        return uuid_to_int_array(self);
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Positive<I> {
-    value: I
+    value: I,
 }
 
-impl<I> Into<NbtTag> for Positive<I> where I: Into<NbtTag> {
+impl<I> Into<NbtTag> for Positive<I>
+where
+    I: Into<NbtTag>,
+{
     fn into(self) -> NbtTag {
         self.value.into()
     }
@@ -206,7 +220,7 @@ pub enum GeneralColor {
     Brown,
     Green,
     Red,
-    Black
+    Black,
 }
 
 impl Into<NbtTag> for GeneralColor {
@@ -305,41 +319,78 @@ macro_rules! __meta_struct {
 }
 
 pub struct Logger<W> {
-    write: W
+    write: W,
 }
 
-impl<W> Logger<W> where W: Write {
+impl<W> Logger<W>
+where
+    W: Write,
+{
     pub fn new(write: W) -> Self {
-        Self {
-            write
-        }
+        Self { write }
     }
 
     pub fn info<S: Into<String>>(&mut self, info: S) {
-        self.write.write_all(format!("{}: {}\n", "[INFO] ".color(Color::TrueColor { r: 122, g: 122, b: 122 }), info.into()).as_bytes()).expect("Could not log information!");
+        self.write
+            .write_all(
+                format!(
+                    "{}: {}\n",
+                    "[INFO] ".color(Color::TrueColor {
+                        r: 122,
+                        g: 122,
+                        b: 122
+                    }),
+                    info.into()
+                )
+                .as_bytes(),
+            )
+            .expect("Could not log information!");
     }
 
     pub fn warn<S: Into<String>>(&mut self, warn: S) {
-        self.write.write_all(format!("{}: {}\n", "[WARN] ".color(Color::BrightYellow), warn.into()).as_bytes()).expect("Could not log warning!");
+        self.write
+            .write_all(
+                format!(
+                    "{}: {}\n",
+                    "[WARN] ".color(Color::BrightYellow),
+                    warn.into()
+                )
+                .as_bytes(),
+            )
+            .expect("Could not log warning!");
     }
 
     pub fn error<S: Into<String>>(&mut self, err: S) {
-        self.write.write_all(format!("{}: {}\n", "[WARN] ".color(Color::BrightRed), err.into()).as_bytes()).expect("Could not log error!");
+        self.write
+            .write_all(
+                format!("{}: {}\n", "[WARN] ".color(Color::BrightRed), err.into()).as_bytes(),
+            )
+            .expect("Could not log error!");
     }
 }
 
 lazy_static! {
-    pub static ref STDOUT_LOGGER: Arc<Mutex<Logger<Stdout>>> = Arc::new(Mutex::new(Logger::new(std::io::stdout())));
+    pub static ref STDOUT_LOGGER: Arc<Mutex<Logger<Stdout>>> =
+        Arc::new(Mutex::new(Logger::new(std::io::stdout())));
 }
 
 pub fn log_info<S: Into<String>>(msg: S) {
-    STDOUT_LOGGER.lock().expect("Could not access logger!").info(msg);
+    STDOUT_LOGGER
+        .lock()
+        .expect("Could not access logger!")
+        .info(msg);
 }
 
 pub fn log_warn<S: Into<String>>(msg: S) {
-    STDOUT_LOGGER.lock().expect("Could not access logger!").warn(msg);
+    STDOUT_LOGGER
+        .lock()
+        .expect("Could not access logger!")
+        .warn(msg);
 }
 
 pub fn log_error<S: Into<String>>(msg: S) {
-    STDOUT_LOGGER.lock().expect("Could not access logger!").error(msg);
+    STDOUT_LOGGER
+        .lock()
+        .expect("Could not access logger!")
+        .error(msg);
 }

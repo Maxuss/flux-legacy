@@ -1,9 +1,6 @@
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
-
-pub use lobsterchat::*;
-use lobsterchat::component::Component;
 use crate::nbt::NbtTag;
+use lobsterchat::component::Component;
+pub use lobsterchat::*;
 
 impl Into<NbtTag> for Component {
     fn into(self) -> NbtTag {

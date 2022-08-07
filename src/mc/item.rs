@@ -23,7 +23,7 @@ impl ItemStack {
         Self {
             mat: Material::Air,
             meta: ItemMeta::Default(DefaultMeta::new()),
-            amount: 0
+            amount: 0,
         }
     }
 
@@ -76,7 +76,7 @@ impl Into<NbtTag> for ItemStack {
             Count: count,
             id: id,
             tag: tag
-        })
+        });
     }
 }
 
@@ -106,7 +106,7 @@ impl MetaContainer for ItemMeta {
     fn tag(&self) -> NbtTag {
         match self {
             ItemMeta::Default(m) => m.tag(),
-            ItemMeta::Skull(m) => m.tag()
+            ItemMeta::Skull(m) => m.tag(),
         }
     }
 }
@@ -179,7 +179,11 @@ impl SkullData {
         let id = Uuid::new_v4();
         let rand_bytes: [u8; 32] = rand::random();
         let name = base64::encode(rand_bytes);
-        Self { id, name, texture: texture.into() }
+        Self {
+            id,
+            name,
+            texture: texture.into(),
+        }
     }
 }
 
@@ -292,7 +296,7 @@ pub enum ItemFlag {
     Unbreakable = 0b000100,
     CanDestroy = 0b001000,
     CanPlace = 0b010000,
-    Dye = 0b100000
+    Dye = 0b100000,
 }
 
 impl Into<NbtTag> for ItemFlag {

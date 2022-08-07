@@ -26,13 +26,19 @@ impl CommandLike for Material {
 }
 
 impl CommandLike for EntityType {
-    fn compile(&mut self) -> String where Self: Sized {
+    fn compile(&mut self) -> String
+    where
+        Self: Sized,
+    {
         self.id().to_string()
     }
 }
 
 impl CommandLike for Location {
-    fn compile(&mut self) -> String where Self: Sized {
+    fn compile(&mut self) -> String
+    where
+        Self: Sized,
+    {
         self.to_string()
     }
 }

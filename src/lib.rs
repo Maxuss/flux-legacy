@@ -14,24 +14,31 @@ pub mod utils;
 #[cfg(test)]
 mod tests {
     use std::fs::File;
-    use std::io::stdout;
-    use std::path::{Path, PathBuf};
+
+    use crate::chat::component::{Component, NamedColor};
+    use crate::mc::commands::{GiveCommand, SummonCommand};
+    use crate::mc::enchant::{Enchant, Enchantment};
+    use crate::mc::entity::meta::{
+        ArmorStand, EntityRotation, Equipment, GeneralZombie, HandItems, StandPose,
+    };
+    use crate::mc::entity::{
+        Attribute, AttributeModifier, AttributeOperation, Entity, FullSelector, IntoSelector,
+        Selector,
+    };
+    use crate::mc::item::{
+        DefaultMeta, SkullData, SkullMeta, SkullOwner, FLAG_HIDE_ATTRIBUTES, FLAG_HIDE_DESTROY,
+        FLAG_HIDE_DYED, FLAG_HIDE_ENCHANTMENTS, FLAG_HIDE_PLACE, FLAG_HIDE_UNBREAKABLE,
+    };
+    use crate::mc::world::WorldAccess;
+    use crate::modules::functions::FunctionWriter;
+    use crate::modules::{Module, GLOBAL_MODULE_LOADER};
+    use crate::prelude::*;
+    use crate::utils::{Keybind, Vec3F};
+    use crate::ExampleModule;
+    use lobsterchat::lobster;
     use std::str::FromStr;
     use std::sync::{Arc, Mutex};
     use std::time::Instant;
-    use lobsterchat::lobster;
-    use crate::chat::component::{Component, NamedColor};
-    use crate::{chat::component::*, ExampleModule};
-    use crate::mc::commands::{GiveCommand, SummonCommand};
-    use crate::mc::enchant::{Enchant, Enchantment};
-    use crate::mc::entity::{Attribute, AttributeModifier, AttributeOperation, Entity, FullSelector, IntoSelector, Selector};
-    use crate::mc::entity::meta::{ArmorStand, EntityRotation, Equipment, GeneralZombie, HandItems, StandPose};
-    use crate::mc::item::{DefaultMeta, FLAG_HIDE_ATTRIBUTES, FLAG_HIDE_DESTROY, FLAG_HIDE_DYED, FLAG_HIDE_ENCHANTMENTS, FLAG_HIDE_PLACE, FLAG_HIDE_UNBREAKABLE, SkullData, SkullMeta, SkullOwner};
-    use crate::mc::world::WorldAccess;
-    use crate::modules::{GLOBAL_MODULE_LOADER, GlobalFluxConfiguration, Module, ModuleLoader};
-    use crate::modules::functions::FunctionWriter;
-    use crate::prelude::*;
-    use crate::utils::{Keybind, Vec3F};
 
     #[test]
     fn test_items() {
@@ -52,8 +59,7 @@ mod tests {
 
     #[test]
     fn give_command() {
-        let mut item = ItemStack::new(
-            Material::DiamondChestplate, None);
+        let mut item = ItemStack::new(Material::DiamondChestplate, None);
         item.meta(ItemMeta::Default(
             DefaultMeta::new()
                 .display(
@@ -61,27 +67,38 @@ mod tests {
                         .name(
                             Component::text("Epic Chestplate")
                                 .color(NamedColor::Gold)
-                                .italic(false))
-                        .lore(
-                            vec![
-                                Component::text("Strength: ")
-                                    .color(NamedColor::Gray)
-                                    .italic(false)
-                                    .append(Component::text("+10").color(NamedColor::Green)),
-                                Component::text(""),
-                                Component::text("Press ")
-                                    .color(NamedColor::Gray)
-                                    .append(Component::keybind(Keybind::Attack).color(NamedColor::Green))
-                                    .append(Component::text(" to attack!").color(NamedColor::Gray))
-                                    .italic(false)
-                            ]))
+                                .italic(false),
+                        )
+                        .lore(vec![
+                            Component::text("Strength: ")
+                                .color(NamedColor::Gray)
+                                .italic(false)
+                                .append(Component::text("+10").color(NamedColor::Green)),
+                            Component::text(""),
+                            Component::text("Press ")
+                                .color(NamedColor::Gray)
+                                .append(
+                                    Component::keybind(Keybind::Attack).color(NamedColor::Green),
+                                )
+                                .append(Component::text(" to attack!").color(NamedColor::Gray))
+                                .italic(false),
+                        ]),
+                )
                 .unbreakable(true)
                 .hide_flags(
-                    FLAG_HIDE_DYED | FLAG_HIDE_ATTRIBUTES |
-                        FLAG_HIDE_DESTROY | FLAG_HIDE_PLACE |
-                        FLAG_HIDE_ENCHANTMENTS | FLAG_HIDE_UNBREAKABLE)
-                .attributes(vec![AttributeModifier::new(Attribute::MovementSpeed, AttributeOperation::Multiply, 1.23)])
-                .enchants(vec![Enchantment::new(Enchant::Protection, 4)])
+                    FLAG_HIDE_DYED
+                        | FLAG_HIDE_ATTRIBUTES
+                        | FLAG_HIDE_DESTROY
+                        | FLAG_HIDE_PLACE
+                        | FLAG_HIDE_ENCHANTMENTS
+                        | FLAG_HIDE_UNBREAKABLE,
+                )
+                .attributes(vec![AttributeModifier::new(
+                    Attribute::MovementSpeed,
+                    AttributeOperation::Multiply,
+                    1.23,
+                )])
+                .enchants(vec![Enchantment::new(Enchant::Protection, 4)]),
         ));
 
         let mut cmd = GiveCommand::new("@p", item);
@@ -112,7 +129,11 @@ mod tests {
             .pose(StandPose::new().right_arm(Vec3F(287.0, 0.0, 0.0)))
             .show_arms(true);
         let time = Instant::now();
-        let mut cmd = SummonCommand::new(EntityType::ArmorStand, Some("~ ~ ~".into()), Some(EntityMeta::ArmorStand(meta)));
+        let mut cmd = SummonCommand::new(
+            EntityType::ArmorStand,
+            Some("~ ~ ~".into()),
+            Some(EntityMeta::ArmorStand(meta)),
+        );
         let diff = (Instant::now() - time).as_micros();
         println!("Took {}mcs", diff);
         println!("{}", cmd.compile())
@@ -121,30 +142,37 @@ mod tests {
     #[test]
     fn test_load_library() -> anyhow::Result<()> {
         let loader = &mut GLOBAL_MODULE_LOADER.lock().unwrap();
-        loader.load(ExampleModule { id: "example".into() })?;
+        loader.load(ExampleModule {
+            id: "example".into(),
+        })?;
         Ok(())
     }
 
     #[test]
     fn test_entity() -> anyhow::Result<()> {
-        let mut world = WorldAccess::new(Arc::new(Mutex::new(FunctionWriter::new(File::create("test.mcfunction").unwrap()))));
+        let mut world = WorldAccess::new(Arc::new(Mutex::new(FunctionWriter::new(
+            File::create("test.mcfunction").unwrap(),
+        ))));
         let mut entity = Entity::new(EntityType::Zombie);
         entity.provide_meta(|| {
             EntityMeta::GeneralZombie(
                 GeneralZombie::new()
-                    .hand_items(HandItems::new(Some(ItemStack::new(Material::DiamondSword, None)), None))
+                    .hand_items(HandItems::new(
+                        Some(ItemStack::new(Material::DiamondSword, None)),
+                        None,
+                    ))
                     .custom_name(lobster("<gold><bold>My Epic Zombie"))
                     .custom_name_visible(true)
                     .no_ai(true)
                     .rotation(EntityRotation::new(120.0, 120.0))
-                    .invulnerable(true)
+                    .invulnerable(true),
             )
         });
         world.summon_entity(Location::from_str("~ ~ ~").unwrap(), entity.clone());
         entity.modify_meta(|meta| {
             if let EntityMeta::GeneralZombie(zombie) = meta {
                 return EntityMeta::GeneralZombie(
-                    zombie.custom_name(lobster("<aqua><italic>Different Zombie"))
+                    zombie.custom_name(lobster("<aqua><italic>Different Zombie")),
                 );
             }
             unreachable!()
@@ -155,7 +183,7 @@ mod tests {
 }
 
 struct ExampleModule {
-    id: String
+    id: String,
 }
 
 impl Module for ExampleModule {

@@ -2,9 +2,9 @@ use std::collections::hash_map::IntoIter;
 use std::collections::HashMap;
 use std::io::Write;
 
+use crate::snbt::StringNbtWriter;
 use anyhow::bail;
 use byteorder::{BigEndian, WriteBytesExt};
-use crate::snbt::StringNbtWriter;
 
 macro_rules! bare_fn {
     ($(
@@ -123,7 +123,9 @@ where
 }
 
 impl<B> From<Box<B>> for NbtTag
-where B: Into<NbtTag> {
+where
+    B: Into<NbtTag>,
+{
     fn from(b: Box<B>) -> Self {
         (*b).into()
     }
@@ -191,7 +193,9 @@ impl NbtTag {
         let mut buf = vec![];
 
         let mut writer = StringNbtWriter::new(&mut buf);
-        writer.write_tag(None, self).expect("Could not stringify nbt tag");
+        writer
+            .write_tag(None, self)
+            .expect("Could not stringify nbt tag");
 
         String::from_utf8(buf).expect("Could not assemble string from ut8 bytes")
     }

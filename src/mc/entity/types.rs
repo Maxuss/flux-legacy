@@ -1,7 +1,7 @@
-use convert_case::{Case, Casing};
 use crate::mc::{Identified, Identifier};
 use crate::nbt::NbtTag;
 use crate::prelude::EntityMeta;
+use convert_case::{Case, Casing};
 
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -124,7 +124,7 @@ pub enum EntityType {
     ZombieVillager,
     ZombifiedPiglin,
     Player,
-    FishingBobber
+    FishingBobber,
 }
 
 impl EntityType {

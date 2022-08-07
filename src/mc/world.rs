@@ -1,19 +1,21 @@
-use std::fmt::Pointer;
+use crate::mc::entity::Entity;
 use std::io::Write;
 use std::sync::{Arc, Mutex};
-use crate::mc::entity::{Entity, IntoSelector, Selector};
-use crate::mc::entity::meta::Allay;
+
 use crate::mc::Identified;
 use crate::modules::functions::FunctionWriter;
-use crate::nbt::{IntoTag, NbtTag};
-use crate::prelude::{CommandLike, EntityMeta, EntityType, Location};
+
+use crate::prelude::{CommandLike, Location};
 
 #[derive(Debug, Clone)]
 pub struct WorldAccess<W> {
-    writer: Arc<Mutex<FunctionWriter<W>>>
+    writer: Arc<Mutex<FunctionWriter<W>>>,
 }
 
-impl<W> WorldAccess<W> where W: Write {
+impl<W> WorldAccess<W>
+where
+    W: Write,
+{
     pub fn new(writer: Arc<Mutex<FunctionWriter<W>>>) -> Self {
         Self { writer }
     }
@@ -36,6 +38,10 @@ impl<W> WorldAccess<W> where W: Write {
     }
 
     pub fn write_line<S: Into<String>>(&mut self, line: S) {
-        self.writer.lock().unwrap().write_line(format!("{}\n", line.into())).expect("Could not write line to world access!");
+        self.writer
+            .lock()
+            .unwrap()
+            .write_line(format!("{}\n", line.into()))
+            .expect("Could not write line to world access!");
     }
 }

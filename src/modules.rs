@@ -1,23 +1,22 @@
 #![allow(dead_code)]
 
-pub mod functions;
 pub mod context;
+pub mod functions;
 
 use std::any::Any;
-use std::fmt::{Debug, format};
-use std::fs::create_dir_all;
+use std::fmt::Debug;
+
+use lazy_static::lazy_static;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use lazy_static::lazy_static;
-use std::sync::{Mutex, Arc};
-use anyhow::bail;
-use colored::{Color, Colorize};
+use std::sync::{Arc, Mutex};
 
-use serde::{Deserialize, Serialize};
 use crate::utils::log_warn;
+use serde::{Deserialize, Serialize};
 
 lazy_static! {
-     pub static ref GLOBAL_MODULE_LOADER: Arc<Mutex<ModuleLoader>> = Arc::new(Mutex::new(ModuleLoader::new(get_loader_info())));
+    pub static ref GLOBAL_MODULE_LOADER: Arc<Mutex<ModuleLoader>> =
+        Arc::new(Mutex::new(ModuleLoader::new(get_loader_info())));
 }
 
 fn get_loader_info() -> GlobalFluxConfiguration {
@@ -25,10 +24,16 @@ fn get_loader_info() -> GlobalFluxConfiguration {
     if !cfg_path.exists() {
         log_warn("No Flux configuration provided! Using default config...");
 
-        return GlobalFluxConfiguration { libraries: vec![], merge_packs: true }
+        return GlobalFluxConfiguration {
+            libraries: vec![],
+            merge_packs: true,
+        };
     }
     let mut buf = String::new();
-    std::fs::File::open(cfg_path).unwrap().read_to_string(&mut buf).unwrap();
+    std::fs::File::open(cfg_path)
+        .unwrap()
+        .read_to_string(&mut buf)
+        .unwrap();
     toml::de::from_str(&buf).unwrap()
 }
 
@@ -100,15 +105,14 @@ pub struct MinecraftDeclaration {
 
 pub struct ModuleLoader {
     config: GlobalFluxConfiguration,
-    modules: Vec<Box<dyn Module>>
+    modules: Vec<Box<dyn Module>>,
 }
-
 
 impl ModuleLoader {
     pub fn new(cfg: GlobalFluxConfiguration) -> Self {
         Self {
             config: cfg,
-            modules: vec![]
+            modules: vec![],
         }
     }
 

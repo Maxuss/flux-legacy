@@ -1,34 +1,32 @@
-use convert_case::{Case, Casing};
-use crate::utils::{Either, Positive, Vec3D, Vec3I};
-use crate::mc::block::Location;
-use crate::nbt::NbtTag;
-use crate::mc::entity::effect::PotionEffect;
-use uuid::Uuid;
-use crate::mc::entity::Attribute;
-use crate::{__meta_struct, nbt};
-use crate::mc::{Identified, Identifier};
-use crate::mc::item::MetaContainer;
-use crate::nbt::NbtWriter;
-use crate::utils::GeneralColor;
-use crate::mc::item::Slot;
-use crate::prelude::*;
-use crate::mc::entity::types::EntityType;
-use crate::mc::entity::effect::Effect;
-use crate::snbt::StringNbtWriter;
-use crate::utils::Vec3F;
 use crate::chat::component::Component;
+use crate::mc::block::Location;
+use crate::mc::entity::effect::Effect;
+use crate::mc::entity::effect::PotionEffect;
+use crate::mc::entity::types::EntityType;
+use crate::mc::entity::Attribute;
+use crate::mc::item::MetaContainer;
+use crate::mc::item::Slot;
+use crate::mc::{Identified, Identifier};
+use crate::nbt::NbtTag;
+use crate::nbt::NbtWriter;
+use crate::prelude::*;
+use crate::snbt::StringNbtWriter;
+use crate::utils::GeneralColor;
+use crate::utils::Vec3F;
+use crate::utils::{Either, Positive, Vec3D, Vec3I};
+use crate::{__meta_struct, nbt};
+use convert_case::{Case, Casing};
+use uuid::Uuid;
 
 #[derive(Debug, Copy, Clone)]
 pub struct EntityRotation {
     yaw: f32,
-    pitch: f32
+    pitch: f32,
 }
 
 impl EntityRotation {
     pub fn new(yaw: f32, pitch: f32) -> Self {
-        Self {
-            yaw, pitch
-        }
+        Self { yaw, pitch }
     }
 }
 
@@ -43,23 +41,33 @@ pub struct ArmorDropChances {
     feet: f32,
     legs: f32,
     chest: f32,
-    head: f32
+    head: f32,
 }
 
 impl ArmorDropChances {
-    pub fn new(feet: Option<f32>, legs: Option<f32>, chest: Option<f32>, head: Option<f32>) -> Self {
+    pub fn new(
+        feet: Option<f32>,
+        legs: Option<f32>,
+        chest: Option<f32>,
+        head: Option<f32>,
+    ) -> Self {
         Self {
             feet: feet.unwrap_or(1.0),
             legs: legs.unwrap_or(1.0),
             chest: chest.unwrap_or(1.0),
-            head: head.unwrap_or(1.0)
+            head: head.unwrap_or(1.0),
         }
     }
 }
 
 impl Into<NbtTag> for ArmorDropChances {
     fn into(self) -> NbtTag {
-        NbtTag::List(vec![NbtTag::Float(self.feet), NbtTag::Float(self.legs), NbtTag::Float(self.chest), NbtTag::Float(self.head)])
+        NbtTag::List(vec![
+            NbtTag::Float(self.feet),
+            NbtTag::Float(self.legs),
+            NbtTag::Float(self.chest),
+            NbtTag::Float(self.head),
+        ])
     }
 }
 
@@ -68,37 +76,47 @@ pub struct Equipment {
     feet: ItemStack,
     legs: ItemStack,
     chest: ItemStack,
-    head: ItemStack
+    head: ItemStack,
 }
 
 impl Equipment {
-    pub fn new(feet: Option<ItemStack>, legs: Option<ItemStack>, chest: Option<ItemStack>, head: Option<ItemStack>) -> Self {
+    pub fn new(
+        feet: Option<ItemStack>,
+        legs: Option<ItemStack>,
+        chest: Option<ItemStack>,
+        head: Option<ItemStack>,
+    ) -> Self {
         Self {
             feet: feet.unwrap_or_else(ItemStack::empty_stack),
             legs: legs.unwrap_or_else(ItemStack::empty_stack),
             chest: chest.unwrap_or_else(ItemStack::empty_stack),
-            head: head.unwrap_or_else(ItemStack::empty_stack)
+            head: head.unwrap_or_else(ItemStack::empty_stack),
         }
     }
 }
 
 impl Into<NbtTag> for Equipment {
     fn into(self) -> NbtTag {
-        NbtTag::List(vec![self.feet.into(), self.legs.into(), self.chest.into(), self.head.into()])
+        NbtTag::List(vec![
+            self.feet.into(),
+            self.legs.into(),
+            self.chest.into(),
+            self.head.into(),
+        ])
     }
 }
 
 #[derive(Debug, Copy, Clone)]
 pub struct EntityAttribute {
     attr: Attribute,
-    base: f64
+    base: f64,
 }
 
 impl EntityAttribute {
     pub fn new(attribute: Attribute, value: f64) -> Self {
         Self {
             attr: attribute,
-            base: value
+            base: value,
         }
     }
 }
@@ -117,35 +135,38 @@ impl Into<NbtTag> for EntityAttribute {
 #[derive(Debug, Copy, Clone)]
 pub struct HandDropChances {
     main_hand: f32,
-    off_hand: f32
+    off_hand: f32,
 }
 
 impl HandDropChances {
     pub fn new(main_hand: Option<f32>, off_hand: Option<f32>) -> Self {
         Self {
             main_hand: main_hand.unwrap_or(1.0),
-            off_hand: off_hand.unwrap_or(1.0)
+            off_hand: off_hand.unwrap_or(1.0),
         }
     }
 }
 
 impl Into<NbtTag> for HandDropChances {
     fn into(self) -> NbtTag {
-        NbtTag::List(vec![NbtTag::Float(self.main_hand), NbtTag::Float(self.off_hand)])
+        NbtTag::List(vec![
+            NbtTag::Float(self.main_hand),
+            NbtTag::Float(self.off_hand),
+        ])
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct HandItems {
     main_hand: ItemStack,
-    off_hand: ItemStack
+    off_hand: ItemStack,
 }
 
 impl HandItems {
     pub fn new(main_hand: Option<ItemStack>, off_hand: Option<ItemStack>) -> Self {
         Self {
             main_hand: main_hand.unwrap_or_else(ItemStack::empty_stack),
-            off_hand: off_hand.unwrap_or_else(ItemStack::empty_stack)
+            off_hand: off_hand.unwrap_or_else(ItemStack::empty_stack),
         }
     }
 }
@@ -466,7 +487,10 @@ impl EntityMeta {
 }
 
 impl CommandLike for EntityMeta {
-    fn compile(&mut self) -> String where Self: Sized {
+    fn compile(&mut self) -> String
+    where
+        Self: Sized,
+    {
         self.stringified()
     }
 }
@@ -1150,8 +1174,17 @@ horse! {
     };
 }
 
-pub fn fish_variant(pattern: FishPattern, body_color: GeneralColor, pattern_color: GeneralColor) -> i32 {
-    return i32::from_be_bytes([if pattern.is_big() { 1 } else { 0 }, pattern.id(), body_color as u8, pattern_color as u8]);
+pub fn fish_variant(
+    pattern: FishPattern,
+    body_color: GeneralColor,
+    pattern_color: GeneralColor,
+) -> i32 {
+    return i32::from_be_bytes([
+        if pattern.is_big() { 1 } else { 0 },
+        pattern.id(),
+        body_color as u8,
+        pattern_color as u8,
+    ]);
 }
 
 #[repr(u8)]
@@ -1177,7 +1210,7 @@ impl FishPattern {
         use FishPattern::*;
         match self {
             Flopper | Stripey | Glitter | Blockfish | Betty | Clayfish => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -1185,7 +1218,7 @@ impl FishPattern {
         use FishPattern::*;
         match self {
             Flopper | Stripey | Glitter | Blockfish | Betty | Clayfish => *self as u8,
-            _ => *self as u8 - 6
+            _ => *self as u8 - 6,
         }
     }
 }
@@ -1195,7 +1228,7 @@ impl FishPattern {
 pub enum ArrowStatus {
     NoPickup,
     Pickup,
-    CreativePickup
+    CreativePickup,
 }
 
 impl Into<NbtTag> for ArrowStatus {
@@ -1209,7 +1242,7 @@ impl Into<NbtTag> for ArrowStatus {
 pub enum PuffState {
     Deflated,
     Halfway,
-    Puffed
+    Puffed,
 }
 
 impl Into<NbtTag> for PuffState {
@@ -1227,7 +1260,7 @@ pub enum RabbitType {
     BlackAndWhite,
     Gold,
     SaltAndPepper,
-    KillerBunny = 99
+    KillerBunny = 99,
 }
 
 impl Into<NbtTag> for RabbitType {
@@ -1243,7 +1276,7 @@ pub enum ParrotColor {
     Blue,
     Green,
     Cyan,
-    Gray
+    Gray,
 }
 
 impl Into<NbtTag> for ParrotColor {
@@ -1260,7 +1293,7 @@ pub enum PandaGene {
     Playful,
     Brown,
     Weak,
-    Aggressive
+    Aggressive,
 }
 
 impl Into<NbtTag> for PandaGene {
@@ -1287,7 +1320,7 @@ pub enum LlamaColor {
     Creamy,
     White,
     Brown,
-    Gray
+    Gray,
 }
 
 impl Into<NbtTag> for LlamaColor {
@@ -1309,7 +1342,7 @@ pub enum HorseColor {
     Brown,
     Black,
     Gray,
-    DarkBrown
+    DarkBrown,
 }
 
 #[repr(i32)]
@@ -1319,14 +1352,14 @@ pub enum HorseMarkings {
     White = 256,
     WhiteField = 512,
     WhiteDots = 768,
-    BlackDots = 1024
+    BlackDots = 1024,
 }
 
 #[derive(Debug, Copy, Clone)]
 pub enum FrogColor {
     Temperate,
     Warm,
-    Cold
+    Cold,
 }
 
 impl Into<NbtTag> for FrogColor {
@@ -1335,11 +1368,10 @@ impl Into<NbtTag> for FrogColor {
     }
 }
 
-
 #[derive(Debug, Copy, Clone)]
 pub enum FoxColor {
     Red,
-    Snow
+    Snow,
 }
 
 impl Into<NbtTag> for FoxColor {
@@ -1361,7 +1393,7 @@ pub enum DragonPhase {
     LandedRoar,
     ChargingPlayer,
     PreparingToDie,
-    Hovering
+    Hovering,
 }
 
 impl Into<NbtTag> for DragonPhase {
@@ -1382,7 +1414,7 @@ pub enum CatVariant {
     Ragdoll,
     White,
     Jellie,
-    AllBlack
+    AllBlack,
 }
 
 impl ToString for CatVariant {
@@ -1411,7 +1443,7 @@ pub enum AxolotlColor {
     Brown,
     Gold,
     Cyan,
-    Blue
+    Blue,
 }
 
 impl Into<NbtTag> for AxolotlColor {
@@ -1522,7 +1554,7 @@ pub enum VillagerLevel {
     Apprentice,
     Journeyman,
     Expert,
-    Master
+    Master,
 }
 
 impl Into<NbtTag> for VillagerLevel {
@@ -1537,7 +1569,7 @@ pub enum GossipType {
     MinorNegative,
     MajorPositive,
     MinorPositive,
-    Trading
+    Trading,
 }
 
 impl Into<NbtTag> for GossipType {
